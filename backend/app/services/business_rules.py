@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Tuple, Optional
 from app.core.config import settings
 
@@ -72,7 +72,19 @@ class BusinessRulesEngine:
         Cancellations are allowed only if the event start time is at least 24 hours in the future.
         Boundary condition: exactly 24 hours or more -> ALLOWED; less than 24 hours -> REJECTED.
         """
-        current_time = now or datetime.utcnow()
+        if now is not None:
+            current_time = now
+        else:
+            if event_start_time.tzinfo is not None:
+                current_time = datetime.now(timezone.utc)
+            else:
+                current_time = datetime.utcnow()
+
+        if event_start_time.tzinfo is not None and current_time.tzinfo is None:
+            current_time = current_time.replace(tzinfo=timezone.utc)
+        elif event_start_time.tzinfo is None and current_time.tzinfo is not None:
+            current_time = current_time.replace(tzinfo=None)
+
         required_hours = window_hours if window_hours is not None else settings.CANCELLATION_WINDOW_HOURS
         time_until_event = event_start_time - current_time
 

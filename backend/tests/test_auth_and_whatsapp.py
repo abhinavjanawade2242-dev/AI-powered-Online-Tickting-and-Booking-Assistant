@@ -125,3 +125,4 @@ async def test_whatsapp_simulation_channel(client: AsyncClient, sample_event_dat
     assert data["session_id"] == "wa_919876543210"
     assert len(data["assistant_reply"]) > 10
     assert data["delivered"] is True
+

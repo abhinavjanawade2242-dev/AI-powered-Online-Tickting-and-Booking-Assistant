@@ -169,3 +169,4 @@ class WhatsAppService:
             "stage": chat_resp.current_stage,
             "language": chat_resp.language
         }
+

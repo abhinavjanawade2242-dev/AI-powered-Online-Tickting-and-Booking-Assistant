@@ -95,3 +95,4 @@ async def simulate_whatsapp_message(
         delivered=True,
         delivery_channel="Meta WhatsApp Cloud API (Simulated)"
     )
+

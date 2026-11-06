@@ -166,3 +166,4 @@ async def update_my_profile(
     await db.commit()
     await db.refresh(current_user)
     return UserProfileResponse.model_validate(current_user)
+
