@@ -33,3 +33,13 @@ ticketing_db.sqlite
 .DS_Store
 Thumbs.db
 
+
+# Next.js generated files
+.next/
+node_modules/
+next-env.d.ts
+tsconfig.tsbuildinfo
+out/
+build/
+
+.env.local
