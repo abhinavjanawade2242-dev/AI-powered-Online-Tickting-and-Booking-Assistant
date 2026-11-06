@@ -1,0 +1,55 @@
+
+name: Python QA Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pytest
+        run: python -m pip install pytest
+
+      - name: Run tests
+        run: python -m pytest -v
+
+name: Member 4 QA Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - feature/qa-integration
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install pytest
+        run: python -m pip install pytest
+
+      - name: Run tests
+        run: python -m pytest tests -v

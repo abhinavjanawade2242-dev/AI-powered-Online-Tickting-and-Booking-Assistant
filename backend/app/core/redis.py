@@ -9,6 +9,7 @@ logger = logging.getLogger("ticketing.redis")
 
 # Global async redis connection pool
 redis_client: Optional[aioredis.Redis] = None
+_redis_init_lock = asyncio.Lock()
 
 
 class InMemoryFallbackRedis:
@@ -111,28 +112,29 @@ class InMemoryLock:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.release()
 
-
-async def get_redis() -> aioredis.Redis:
-    """Retrieve active Redis client, initializing or falling back if necessary."""
+async def get_redis():
     global redis_client
+
     if redis_client is None:
-        try:
-            client = aioredis.from_url(
-                settings.REDIS_URL,
-                decode_responses=True,
-                protocol=2,
-                socket_timeout=2.0,
-                socket_connect_timeout=2.0,
-            )
-            await client.ping()
-            redis_client = client
-            logger.info("Successfully connected to Redis instance at %s", settings.REDIS_URL)
-        except Exception as e:
-            logger.warning(
-                "Redis connection failed (%s). Falling back to resilient in-memory distributed lock emulator.",
-                e
-            )
-            redis_client = InMemoryFallbackRedis()
+        async with _redis_init_lock:
+            if redis_client is None:
+                try:
+                    client = aioredis.from_url(
+                        settings.REDIS_URL,
+                        decode_responses=True,
+                        protocol=2,
+                        socket_timeout=2.0,
+                        socket_connect_timeout=2.0,
+                    )
+                    await client.ping()
+                    redis_client = client
+                    logger.info("Connected to Redis")
+                except Exception as e:
+                    logger.warning(
+                        "Redis unavailable. Using in-memory fallback: %s", e
+                    )
+                    redis_client = InMemoryFallbackRedis()
+
     return redis_client
 
 
