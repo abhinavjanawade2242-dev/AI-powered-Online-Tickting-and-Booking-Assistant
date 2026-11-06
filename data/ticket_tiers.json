@@ -1,0 +1,191 @@
+[
+  {
+    "id": "tier-tech-early",
+    "name": "Early Bird Hacker Pass",
+    "price": 299.0,
+    "currency": "INR",
+    "total_quantity": 80,
+    "available_quantity": 80,
+    "event_id": "event-technovate-hack"
+  },
+  {
+    "id": "tier-tech-std",
+    "name": "Standard Team Pass (Per Person)",
+    "price": 599.0,
+    "currency": "INR",
+    "total_quantity": 150,
+    "available_quantity": 150,
+    "event_id": "event-technovate-hack"
+  },
+  {
+    "id": "tier-tech-vip",
+    "name": "VIP Mentorship & Swag Pack Pass",
+    "price": 1199.0,
+    "currency": "INR",
+    "total_quantity": 40,
+    "available_quantity": 40,
+    "event_id": "event-technovate-hack"
+  },
+  {
+    "id": "tier-dhwani-ga",
+    "name": "General Admission Pass",
+    "price": 150.0,
+    "currency": "INR",
+    "total_quantity": 800,
+    "available_quantity": 800,
+    "event_id": "event-dhwani-fest"
+  },
+  {
+    "id": "tier-dhwani-vip",
+    "name": "Front Stage VIP Moshpit Pass",
+    "price": 450.0,
+    "currency": "INR",
+    "total_quantity": 150,
+    "available_quantity": 150,
+    "event_id": "event-dhwani-fest"
+  },
+  {
+    "id": "tier-ai-student",
+    "name": "Student Delegate Pass",
+    "price": 350.0,
+    "currency": "INR",
+    "total_quantity": 350,
+    "available_quantity": 350,
+    "event_id": "event-ai-robotics-summit"
+  },
+  {
+    "id": "tier-ai-workshop",
+    "name": "Full Access + Hands-on Kit",
+    "price": 850.0,
+    "currency": "INR",
+    "total_quantity": 100,
+    "available_quantity": 100,
+    "event_id": "event-ai-robotics-summit"
+  },
+  {
+    "id": "tier-esports-spec",
+    "name": "Spectator Gallery Pass",
+    "price": 100.0,
+    "currency": "INR",
+    "total_quantity": 400,
+    "available_quantity": 400,
+    "event_id": "event-esports-championship"
+  },
+  {
+    "id": "tier-esports-player",
+    "name": "Competitor Team Pass",
+    "price": 250.0,
+    "currency": "INR",
+    "total_quantity": 64,
+    "available_quantity": 64,
+    "event_id": "event-esports-championship"
+  },
+  {
+    "id": "tier-esports-vip",
+    "name": "VIP Dugout & Player Meet Pass",
+    "price": 500.0,
+    "currency": "INR",
+    "total_quantity": 50,
+    "available_quantity": 50,
+    "event_id": "event-esports-championship"
+  },
+  {
+    "id": "tier-theatre-balcony",
+    "name": "Student Balcony Seating",
+    "price": 120.0,
+    "currency": "INR",
+    "total_quantity": 180,
+    "available_quantity": 180,
+    "event_id": "event-kannada-theatre"
+  },
+  {
+    "id": "tier-theatre-orch",
+    "name": "Main Orchestra Seating",
+    "price": 250.0,
+    "currency": "INR",
+    "total_quantity": 120,
+    "available_quantity": 120,
+    "event_id": "event-kannada-theatre"
+  },
+  {
+    "id": "tier-theatre-patron",
+    "name": "Patron Premium Seating",
+    "price": 500.0,
+    "currency": "INR",
+    "total_quantity": 40,
+    "available_quantity": 40,
+    "event_id": "event-kannada-theatre"
+  },
+  {
+    "id": "tier-pitch-attendee",
+    "name": "Student Observer Pass",
+    "price": 200.0,
+    "currency": "INR",
+    "total_quantity": 120,
+    "available_quantity": 120,
+    "event_id": "event-startup-pitch-fest"
+  },
+  {
+    "id": "tier-pitch-founder",
+    "name": "Founder Pitch Registration",
+    "price": 500.0,
+    "currency": "INR",
+    "total_quantity": 25,
+    "available_quantity": 25,
+    "event_id": "event-startup-pitch-fest"
+  },
+  {
+    "id": "tier-fusion-student",
+    "name": "Student Pass",
+    "price": 180.0,
+    "currency": "INR",
+    "total_quantity": 300,
+    "available_quantity": 300,
+    "event_id": "event-classical-fusion"
+  },
+  {
+    "id": "tier-fusion-prem",
+    "name": "VIP Stage View Pass",
+    "price": 400.0,
+    "currency": "INR",
+    "total_quantity": 80,
+    "available_quantity": 80,
+    "event_id": "event-classical-fusion"
+  },
+  {
+    "id": "tier-cyber-pass",
+    "name": "Bootcamp Certification Pass",
+    "price": 499.0,
+    "currency": "INR",
+    "total_quantity": 90,
+    "available_quantity": 90,
+    "event_id": "event-cybersec-bootcamp"
+  },
+  {
+    "id": "tier-tedx-delegate",
+    "name": "Standard Delegate Pass",
+    "price": 400.0,
+    "currency": "INR",
+    "total_quantity": 250,
+    "available_quantity": 250,
+    "event_id": "event-tedx-campus"
+  },
+  {
+    "id": "tier-tedx-vip",
+    "name": "VIP Delegate & Speakers Lunch",
+    "price": 950.0,
+    "currency": "INR",
+    "total_quantity": 40,
+    "available_quantity": 40,
+    "event_id": "event-tedx-campus"
+  },
+  {
+    "id": "tier-roboclash-std",
+    "name": "Draft Spectator Pass",
+    "price": 150.0,
+    "currency": "INR",
+    "total_quantity": 100,
+    "available_quantity": 100,
+    "event_id": "event-draft-robot-wars"
+  }
+]
