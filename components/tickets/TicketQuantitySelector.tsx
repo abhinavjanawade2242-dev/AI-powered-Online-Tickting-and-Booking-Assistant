@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -10,6 +9,7 @@ import {
     MapPin,
     Clock,
     ShoppingBag,
+    ArrowRight,
 } from "lucide-react";
 
 type TicketQuantitySelectorProps = {
@@ -19,6 +19,7 @@ type TicketQuantitySelectorProps = {
     eventTime: string;
     venue: string;
     city: string;
+    onContinue: (quantity: number) => void;
 };
 
 export default function TicketQuantitySelector({
@@ -28,10 +29,11 @@ export default function TicketQuantitySelector({
     eventTime,
     venue,
     city,
+    onContinue,
 }: TicketQuantitySelectorProps) {
     const [quantity, setQuantity] = useState(1);
 
-    // Demo limit until backend availability is connected.
+    // Temporary frontend demo limit.
     const maxTickets = 10;
 
     const total = price * quantity;
@@ -106,7 +108,11 @@ export default function TicketQuantitySelector({
 
                         <button
                             type="button"
-                            onClick={() => setQuantity((previous) => Math.max(1, previous - 1))}
+                            onClick={() =>
+                                setQuantity((previous) =>
+                                    Math.max(1, previous - 1)
+                                )
+                            }
                             disabled={quantity <= 1}
                             aria-label="Decrease ticket quantity"
                             className="rounded-xl border border-white/10 bg-[#202039] p-3 text-white transition hover:border-violet-400 disabled:cursor-not-allowed disabled:opacity-30"
@@ -120,7 +126,11 @@ export default function TicketQuantitySelector({
 
                         <button
                             type="button"
-                            onClick={() => setQuantity((previous) => Math.min(maxTickets, previous + 1))}
+                            onClick={() =>
+                                setQuantity((previous) =>
+                                    Math.min(maxTickets, previous + 1)
+                                )
+                            }
                             disabled={quantity >= maxTickets}
                             aria-label="Increase ticket quantity"
                             className="rounded-xl border border-white/10 bg-[#202039] p-3 text-white transition hover:border-violet-400 disabled:cursor-not-allowed disabled:opacity-30"
@@ -157,8 +167,17 @@ export default function TicketQuantitySelector({
 
                     <div className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-violet-600/15 px-4 py-3 text-sm font-semibold text-violet-300">
                         <ShoppingBag size={17} />
-                        Ticket quantity selected: {quantity}
+                        Tickets selected: {quantity}
                     </div>
+
+                    <button
+                        type="button"
+                        onClick={() => onContinue(quantity)}
+                        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-4 font-bold text-white shadow-lg shadow-violet-900/30 transition hover:-translate-y-1 hover:shadow-violet-500/30"
+                    >
+                        Continue to Checkout
+                        <ArrowRight size={18} />
+                    </button>
                 </div>
             </div>
         </section>

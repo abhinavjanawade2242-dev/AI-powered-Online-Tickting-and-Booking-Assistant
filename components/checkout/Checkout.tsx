@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import {
     ArrowLeft,
     CreditCard,
@@ -9,8 +10,6 @@ import {
     Mail,
     Phone,
     ShieldCheck,
-    Sparkles,
-    CheckCircle2,
 } from "lucide-react";
 
 import BookingConfirmation, {
@@ -20,7 +19,7 @@ import BookingConfirmation, {
 type CheckoutProps = {
     eventName: string;
     price: number;
-    selectedSeats: string[];
+    quantity?: number;
     onBack: () => void;
     eventDate: string;
     eventTime: string;
@@ -28,10 +27,16 @@ type CheckoutProps = {
     city: string;
 };
 
+type FormErrors = {
+    customerName?: string;
+    email?: string;
+    phone?: string;
+};
+
 export default function Checkout({
     eventName,
     price,
-    selectedSeats,
+    quantity = 0,
     onBack,
     eventDate,
     eventTime,
@@ -41,31 +46,65 @@ export default function Checkout({
     const [customerName, setCustomerName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
-    const [status, setStatus] = useState("");
+    const [errors, setErrors] = useState<FormErrors>({});
     const [booking, setBooking] = useState<BookingDetails | null>(null);
 
-    const subtotal = selectedSeats.length * price;
-    const convenienceFee = selectedSeats.length * 30;
+    const ticketCount = quantity;
+    const subtotal = ticketCount * price;
+    const convenienceFee = ticketCount * 30;
     const total = subtotal + convenienceFee;
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+
+        const newErrors: FormErrors = {};
+
+        if (!customerName.trim()) {
+            newErrors.customerName = "Please enter your full name.";
+        }
+
+        if (!email.trim()) {
+            newErrors.email = "Please enter your email address.";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            newErrors.email = "Please enter a valid email address.";
+        }
+
+        if (!phone.trim()) {
+            newErrors.phone = "Please enter your phone number.";
+        } else if (!/^[0-9]{10}$/.test(phone)) {
+            newErrors.phone = "Phone number must contain exactly 10 digits.";
+        }
+
+        setErrors(newErrors);
+
+        if (Object.keys(newErrors).length > 0 || ticketCount < 1) {
+            return;
+        }
 
         const newBooking: BookingDetails = {
             bookingId: `DEMO-${Date.now().toString().slice(-8)}`,
             eventName,
-            customerName,
-            email,
-            phone,
-            selectedSeats,
-            total,
             eventDate,
             eventTime,
             venue,
             city,
+            customerName: customerName.trim(),
+            email: email.trim(),
+            phone,
+            quantity: ticketCount,
+            price,
+            convenienceFee,
+            total,
         };
 
         setBooking(newBooking);
+    }
+
+    function clearError(field: keyof FormErrors) {
+        setErrors((previous) => ({
+            ...previous,
+            [field]: undefined,
+        }));
     }
 
     if (booking) {
@@ -79,7 +118,6 @@ export default function Checkout({
 
     return (
         <section className="checkout-experience relative my-10 overflow-hidden rounded-3xl border border-violet-500/20 bg-[#0d0b1c] p-5 text-white shadow-[0_20px_80px_rgba(0,0,0,0.4)] sm:p-8">
-
             <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-violet-600/15 blur-[100px]" />
             <div className="pointer-events-none absolute -bottom-32 -left-32 h-80 w-80 rounded-full bg-indigo-600/15 blur-[100px]" />
 
@@ -89,12 +127,12 @@ export default function Checkout({
                 className="relative mb-8 flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-slate-300 transition duration-300 hover:-translate-x-1 hover:border-violet-400/40 hover:bg-violet-500/10 hover:text-white"
             >
                 <ArrowLeft size={17} />
-                Back to seat selection
+                Back to Ticket Selection
             </button>
 
             <div className="checkout-heading relative mb-8">
                 <div className="mb-3 flex items-center gap-2 text-sm font-bold tracking-[0.2em] text-violet-400">
-                    <Sparkles size={16} />
+                    <Ticket size={16} />
                     SECURE CHECKOUT
                 </div>
 
@@ -107,20 +145,12 @@ export default function Checkout({
                 </p>
             </div>
 
-            {status && (
-                <div
-                    role="status"
-                    className="relative mb-7 flex gap-3 rounded-xl border border-amber-400/30 bg-amber-500/10 p-4 text-sm leading-6 text-amber-200"
-                >
-                    <CheckCircle2 className="mt-0.5 shrink-0 text-amber-400" size={20} />
-                    <p>{status}</p>
-                </div>
-            )}
-
             <div className="relative grid gap-8 lg:grid-cols-2">
-
-                <form onSubmit={handleSubmit} className="checkout-form space-y-6">
-
+                <form
+                    onSubmit={handleSubmit}
+                    noValidate
+                    className="checkout-form space-y-6"
+                >
                     <div className="flex items-center gap-3">
                         <div className="rounded-xl bg-violet-500/15 p-3 text-violet-300">
                             <User size={21} />
@@ -137,8 +167,11 @@ export default function Checkout({
                     </div>
 
                     <div>
-                        <label htmlFor="customerName" className="mb-2 block text-sm font-semibold text-slate-300">
-                            Full name
+                        <label
+                            htmlFor="customerName"
+                            className="mb-2 block text-sm font-semibold text-slate-300"
+                        >
+                            Full name <span className="text-red-400">*</span>
                         </label>
 
                         <div className="checkout-input flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 transition duration-300 focus-within:border-violet-400/70 focus-within:bg-violet-500/[0.06] focus-within:ring-2 focus-within:ring-violet-500/20">
@@ -152,18 +185,37 @@ export default function Checkout({
                                 value={customerName}
                                 onChange={(event) => {
                                     setCustomerName(event.target.value);
-                                    setStatus("");
+                                    clearError("customerName");
                                 }}
+                                aria-invalid={Boolean(errors.customerName)}
+                                aria-describedby={
+                                    errors.customerName
+                                        ? "customerName-error"
+                                        : undefined
+                                }
                                 placeholder="Enter your full name"
                                 autoComplete="name"
                                 className="w-full bg-transparent py-3.5 text-sm text-white outline-none placeholder:text-slate-500"
                             />
                         </div>
+
+                        {errors.customerName && (
+                            <p
+                                id="customerName-error"
+                                role="alert"
+                                className="mt-2 text-xs text-red-400"
+                            >
+                                {errors.customerName}
+                            </p>
+                        )}
                     </div>
 
                     <div>
-                        <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-300">
-                            Email address
+                        <label
+                            htmlFor="email"
+                            className="mb-2 block text-sm font-semibold text-slate-300"
+                        >
+                            Email address <span className="text-red-400">*</span>
                         </label>
 
                         <div className="checkout-input flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 transition duration-300 focus-within:border-violet-400/70 focus-within:bg-violet-500/[0.06] focus-within:ring-2 focus-within:ring-violet-500/20">
@@ -176,18 +228,35 @@ export default function Checkout({
                                 value={email}
                                 onChange={(event) => {
                                     setEmail(event.target.value);
-                                    setStatus("");
+                                    clearError("email");
                                 }}
+                                aria-invalid={Boolean(errors.email)}
+                                aria-describedby={
+                                    errors.email ? "email-error" : undefined
+                                }
                                 placeholder="example@email.com"
                                 autoComplete="email"
                                 className="w-full bg-transparent py-3.5 text-sm text-white outline-none placeholder:text-slate-500"
                             />
                         </div>
+
+                        {errors.email && (
+                            <p
+                                id="email-error"
+                                role="alert"
+                                className="mt-2 text-xs text-red-400"
+                            >
+                                {errors.email}
+                            </p>
+                        )}
                     </div>
 
                     <div>
-                        <label htmlFor="phone" className="mb-2 block text-sm font-semibold text-slate-300">
-                            Phone number
+                        <label
+                            htmlFor="phone"
+                            className="mb-2 block text-sm font-semibold text-slate-300"
+                        >
+                            Phone number <span className="text-red-400">*</span>
                         </label>
 
                         <div className="checkout-input flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 transition duration-300 focus-within:border-violet-400/70 focus-within:bg-violet-500/[0.06] focus-within:ring-2 focus-within:ring-violet-500/20">
@@ -197,30 +266,53 @@ export default function Checkout({
                                 id="phone"
                                 type="tel"
                                 required
+                                inputMode="numeric"
                                 pattern="[0-9]{10}"
                                 maxLength={10}
                                 value={phone}
                                 onChange={(event) => {
                                     setPhone(event.target.value);
-                                    setStatus("");
+                                    clearError("phone");
                                 }}
+                                aria-invalid={Boolean(errors.phone)}
+                                aria-describedby={
+                                    errors.phone ? "phone-error" : "phone-help"
+                                }
                                 placeholder="10-digit mobile number"
                                 autoComplete="tel"
                                 className="w-full bg-transparent py-3.5 text-sm text-white outline-none placeholder:text-slate-500"
                             />
                         </div>
 
-                        <p className="mt-2 text-xs text-slate-500">
-                            Enter a 10-digit mobile number.
-                        </p>
+                        {errors.phone ? (
+                            <p
+                                id="phone-error"
+                                role="alert"
+                                className="mt-2 text-xs text-red-400"
+                            >
+                                {errors.phone}
+                            </p>
+                        ) : (
+                            <p
+                                id="phone-help"
+                                className="mt-2 text-xs text-slate-500"
+                            >
+                                Enter a 10-digit mobile number.
+                            </p>
+                        )}
+                    </div>
+
+                    <div aria-live="polite" aria-atomic="true" className="sr-only">
+                        {Object.values(errors).filter(Boolean).join(" ")}
                     </div>
 
                     <button
                         type="submit"
-                        className="checkout-pay group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-[length:200%_200%] px-5 py-4 font-bold text-white shadow-lg shadow-violet-900/30 transition duration-300 hover:-translate-y-1 hover:shadow-[0_10px_35px_rgba(139,92,246,0.35)]"
+                        disabled={ticketCount < 1}
+                        className="checkout-pay group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 bg-[length:200%_200%] px-5 py-4 font-bold text-white shadow-lg shadow-violet-900/30 transition duration-300 hover:-translate-y-1 hover:shadow-[0_10px_35px_rgba(139,92,246,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <CreditCard size={19} />
-                        Continue to Payment
+                        Confirm Demo Booking
                         <span className="transition-transform group-hover:translate-x-1">
                             →
                         </span>
@@ -233,15 +325,18 @@ export default function Checkout({
                 </form>
 
                 <div className="checkout-summary h-fit rounded-2xl border border-violet-400/20 bg-gradient-to-br from-[#19152f] to-[#111024] p-5 shadow-xl sm:p-6">
-
                     <div className="mb-6 flex items-center gap-3">
                         <div className="rounded-xl bg-violet-500/15 p-3 text-violet-300">
                             <Ticket size={22} />
                         </div>
 
                         <div>
-                            <h3 className="font-bold text-white">Order Summary</h3>
-                            <p className="text-xs text-slate-400">Your ticket details</p>
+                            <h3 className="font-bold text-white">
+                                Order Summary
+                            </h3>
+                            <p className="text-xs text-slate-400">
+                                Your ticket details
+                            </p>
                         </div>
                     </div>
 
@@ -261,27 +356,9 @@ export default function Checkout({
                             <p>City: {city}</p>
                         </div>
 
-                        <p className="mt-3 text-sm text-slate-400">
-                            {selectedSeats.length} ticket(s) selected
+                        <p className="mt-3 text-sm font-semibold text-violet-300">
+                            General Admission · {ticketCount} ticket(s)
                         </p>
-                    </div>
-
-                    <div className="mt-5">
-                        <p className="mb-3 text-xs font-semibold tracking-wider text-slate-400">
-                            SELECTED SEATS
-                        </p>
-
-                        <div className="flex flex-wrap gap-2">
-                            {selectedSeats.map((seat, index) => (
-                                <span
-                                    key={seat}
-                                    className="checkout-seat rounded-lg border border-violet-400/30 bg-violet-500/15 px-3 py-2 text-xs font-bold text-violet-200"
-                                    style={{ animationDelay: `${index * 80}ms` }}
-                                >
-                                    {seat}
-                                </span>
-                            ))}
-                        </div>
                     </div>
 
                     <div className="mt-7 space-y-4">
@@ -289,6 +366,13 @@ export default function Checkout({
                             <span>Price per ticket</span>
                             <span className="font-semibold text-white">
                                 ₹{price.toLocaleString("en-IN")}
+                            </span>
+                        </div>
+
+                        <div className="flex justify-between text-sm text-slate-400">
+                            <span>Ticket quantity</span>
+                            <span className="font-semibold text-white">
+                                {ticketCount}
                             </span>
                         </div>
 
@@ -321,8 +405,8 @@ export default function Checkout({
 
                     <div className="mt-6 rounded-xl border border-amber-400/20 bg-amber-500/5 p-3">
                         <p className="text-xs leading-5 text-amber-200/80">
-                            Sample convenience fee for this frontend demo.
-                            No payment is processed and no seats are reserved.
+                            This is a frontend demonstration. No payment is
+                            processed and no tickets are reserved.
                         </p>
                     </div>
                 </div>

@@ -14,9 +14,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TravelTech | Online Ticket Booking",
+  title: "TicketEase | AI-Powered Online Ticket Booking",
   description:
-    "Discover events, choose seats, and book tickets easily with TravelTech.",
+    "Discover events, explore ticket options, and book General Admission tickets easily with TicketEase, your AI-powered ticket booking assistant.",
+  applicationName: "TicketEase",
+  keywords: [
+    "TicketEase",
+    "Online Ticket Booking",
+    "Event Booking",
+    "General Admission",
+    "AI Booking Assistant",
+  ],
 };
 
 export default function RootLayout({
@@ -29,7 +37,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+      </body>
     </html>
   );
 }

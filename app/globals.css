@@ -27,7 +27,8 @@ body {
 
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 
@@ -35,10 +36,29 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: not-allowed;
+}
+
 ::selection {
   background: #7c3aed;
   color: white;
 }
+
+/* Global keyboard focus accessibility */
+
+:where(button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"],
+  [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Reusable visual effects */
 
 .dark-glass {
   background: rgba(21, 21, 45, 0.78);
@@ -60,6 +80,8 @@ button {
   box-shadow: 0 20px 45px rgba(124, 58, 237, 0.2);
 }
 
+/* Floating animation */
+
 @keyframes floating {
 
   0%,
@@ -76,6 +98,8 @@ button {
   animation: floating 4s ease-in-out infinite;
 }
 
+/* Glow animation */
+
 @keyframes glow {
 
   0%,
@@ -90,18 +114,6 @@ button {
 
 .animated-glow {
   animation: glow 3s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
 }
 
 /* Force existing light Tailwind surfaces into dark theme */
@@ -157,6 +169,8 @@ textarea::placeholder {
   color: #9ca3af !important;
 }
 
+/* Event card animations */
+
 @keyframes cardEntrance {
   from {
     opacity: 0;
@@ -179,20 +193,7 @@ textarea::placeholder {
   transform: perspective(1000px) translateY(-12px) rotateX(2deg) rotateY(-2deg);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .event-card-3d {
-    animation: none;
-    transition: none;
-  }
-
-  .event-card-3d:hover {
-    transform: none;
-  }
-}
-
-/* =================================
-   TicketEase Full Page Animations
-================================= */
+/* TicketEase full page animations */
 
 .homepage-animated {
   position: relative;
@@ -200,6 +201,7 @@ textarea::placeholder {
 }
 
 /* Animated ambient background */
+
 .homepage-animated::before {
   content: "";
   position: fixed;
@@ -214,6 +216,7 @@ textarea::placeholder {
 }
 
 /* Floating light particles */
+
 .homepage-animated::after {
   content: "";
   position: fixed;
@@ -231,7 +234,6 @@ textarea::placeholder {
   animation: particleFloat 25s linear infinite;
 }
 
-/* Background movement */
 @keyframes backgroundFloat {
   0% {
     transform: translate3d(-2%, -2%, 0) scale(1);
@@ -246,7 +248,6 @@ textarea::placeholder {
   }
 }
 
-/* Particle movement */
 @keyframes particleFloat {
   from {
     background-position: 0 0;
@@ -257,7 +258,8 @@ textarea::placeholder {
   }
 }
 
-/* Hero content entrance */
+/* Hero entrance */
+
 #home .relative>div:first-child {
   animation: heroEntrance 1s ease-out both;
 }
@@ -291,8 +293,8 @@ textarea::placeholder {
 }
 
 /* Section appearance */
-#events,
-#seat-selection {
+
+#events {
   animation: sectionEntrance 0.8s ease-out both;
 }
 
@@ -308,36 +310,14 @@ textarea::placeholder {
   }
 }
 
-/* Glowing interactive buttons */
+/* Interactive buttons */
+
 .homepage-animated button {
   -webkit-tap-highlight-color: transparent;
 }
 
-.homepage-animated button:focus-visible,
-.homepage-animated a:focus-visible,
-.homepage-animated input:focus-visible {
-  outline: 2px solid #a78bfa;
-  outline-offset: 4px;
-}
+/* Header, AI banner and footer */
 
-/* Reduced motion accessibility */
-@media (prefers-reduced-motion: reduce) {
-
-  .homepage-animated::before,
-  .homepage-animated::after,
-  #home .relative>div:first-child,
-  #home .relative>div:last-child,
-  #events,
-  #seat-selection {
-    animation: none !important;
-  }
-}
-
-/* =================================
-   Header, AI Banner and Footer
-================================= */
-
-/* Header glass effect */
 .homepage-animated header {
   transition: background 0.4s ease, border-color 0.4s ease;
 }
@@ -357,6 +337,7 @@ textarea::placeholder {
 }
 
 /* Navigation hover */
+
 .homepage-animated nav a,
 .homepage-animated nav button {
   position: relative;
@@ -382,6 +363,7 @@ textarea::placeholder {
 }
 
 /* AI banner glow */
+
 .homepage-animated section:has(> div > div > button) {
   isolation: isolate;
 }
@@ -395,7 +377,8 @@ textarea::placeholder {
   box-shadow: 0 0 35px rgba(124, 58, 237, 0.15);
 }
 
-/* AI button animated gradient */
+/* AI button gradient */
+
 .homepage-animated section button {
   background-size: 200% 200%;
   transition: background-position 0.5s ease, transform 0.3s ease;
@@ -406,6 +389,7 @@ textarea::placeholder {
 }
 
 /* Footer glow */
+
 .homepage-animated footer {
   position: relative;
   overflow: hidden;
@@ -436,78 +420,7 @@ textarea::placeholder {
   }
 }
 
-/* Accessibility */
-@media (prefers-reduced-motion: reduce) {
-
-  .homepage-animated header a:first-child>span:first-child,
-  .homepage-animated footer::before {
-    animation: none;
-  }
-}
-
-/* Seat selection animations */
-
-.seat-experience {
-  perspective: 1200px;
-}
-
-.seat-row {
-  animation: seatRowEnter 0.7s ease both;
-}
-
-@keyframes seatRowEnter {
-  from {
-    opacity: 0;
-    transform: translateY(18px) rotateX(-12deg);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) rotateX(0);
-  }
-}
-
-.seat-button {
-  transform-style: preserve-3d;
-  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.3);
-}
-
-.seat-button:not(:disabled):active {
-  transform: translateY(2px) scale(0.94);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
-}
-
-.selected-seat {
-  animation: selectedSeatPulse 1.8s ease-in-out infinite;
-}
-
-@keyframes selectedSeatPulse {
-
-  0%,
-  100% {
-    box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
-  }
-
-  50% {
-    box-shadow: 0 0 28px rgba(139, 92, 246, 0.85);
-  }
-}
-
-.seat-chip {
-  animation: chipEnter 0.3s ease both;
-}
-
-@keyframes chipEnter {
-  from {
-    opacity: 0;
-    transform: scale(0.7) translateY(6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
+/* Checkout button animation */
 
 .checkout-button {
   background-size: 200% 200%;
@@ -516,20 +429,6 @@ textarea::placeholder {
 
 .checkout-button:hover:not(:disabled) {
   background-position: 100% 50%;
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-  .seat-row,
-  .selected-seat,
-  .seat-chip {
-    animation: none !important;
-  }
-
-  .seat-button,
-  .checkout-button {
-    transition: none !important;
-  }
 }
 
 /* Checkout page animations */
@@ -601,22 +500,6 @@ textarea::placeholder {
   box-shadow: 0 0 22px rgba(139, 92, 246, 0.12);
 }
 
-.checkout-seat {
-  animation: checkoutSeatEnter 0.4s ease both;
-}
-
-@keyframes checkoutSeatEnter {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.8);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 .checkout-total {
   animation: checkoutPriceGlow 2.5s ease-in-out infinite;
 }
@@ -648,23 +531,7 @@ textarea::placeholder {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-
-  .checkout-heading,
-  .checkout-form,
-  .checkout-summary,
-  .checkout-seat,
-  .checkout-total {
-    animation: none !important;
-  }
-
-  .checkout-input,
-  .checkout-pay {
-    transition: none !important;
-  }
-}
-
-/* AI Chatbot animations */
+/* AI chatbot animations */
 
 .chat-window {
   animation: chatWindowEnter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -731,11 +598,24 @@ textarea::placeholder {
   box-shadow: 0 0 22px rgba(139, 92, 246, 0.5);
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* Reduced motion accessibility */
 
-  .chat-window,
-  .chat-message,
-  .typing-dot {
-    animation: none !important;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .card-3d:hover,
+  .event-card-3d:hover {
+    transform: none !important;
   }
 }
