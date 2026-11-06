@@ -6,6 +6,7 @@ from app.schemas import BookingReservationRequest
 from app.services.event_service import EventService
 from app.services.inventory_service import InventoryService
 from app.services.booking_service import BookingService
+from app.services.pricing_service import PricingService
 from app.services.concurrency import InsufficientInventoryError, LockAcquisitionError
 
 logger = logging.getLogger("ticketing.ai.tools")
@@ -85,6 +86,36 @@ class AgentTools:
             return {"error": str(e)}
 
     @staticmethod
+    async def calculate_price_quote(
+        db: AsyncSession,
+        tier_id: str,
+        quantity: int,
+        promo_code: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Stage 4: Calculate accurate price quote with group discounts and promo codes."""
+        try:
+            quote = await PricingService.get_tier_quote(
+                db=db,
+                tier_id=tier_id,
+                quantity=quantity,
+                promo_code=promo_code
+            )
+            return {
+                "success": True,
+                "unit_price": f"₹{quote.unit_price:.2f}",
+                "quantity": quote.quantity,
+                "base_amount": f"₹{quote.base_amount:.2f}",
+                "discount_amount": f"₹{quote.discount_amount:.2f}",
+                "discount_description": quote.discount_description,
+                "total_payable": f"₹{quote.total_payable:.2f}",
+                "currency": quote.currency,
+                "is_free": quote.is_free
+            }
+        except Exception as e:
+            logger.error("Price quote error: %s", e)
+            return {"success": False, "error": str(e)}
+
+    @staticmethod
     async def reserve_and_book_tickets(
         db: AsyncSession,
         event_id: str,
@@ -92,7 +123,8 @@ class AgentTools:
         quantity: int,
         customer_name: str,
         customer_email: str,
-        customer_phone: Optional[str] = None
+        customer_phone: Optional[str] = None,
+        promo_code: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Stage 4 & 5: Reserve and Book.
@@ -106,6 +138,7 @@ class AgentTools:
                 customer_name=customer_name,
                 customer_email=customer_email,
                 customer_phone=customer_phone,
+                promo_code=promo_code
             )
             # Step 1: Atomic reservation with distributed lock
             booking = await BookingService.reserve_tickets_atomic(db, req)
@@ -119,7 +152,7 @@ class AgentTools:
             tickets = [
                 {
                     "ticket_code": t.ticket_code,
-                    "seat_number": t.seat_number,
+                    "admission_type": "General Admission",
                     "status": t.status,
                 }
                 for t in confirmed_booking.tickets
@@ -164,7 +197,7 @@ class AgentTools:
         tickets = [
             {
                 "ticket_code": t.ticket_code,
-                "seat_number": t.seat_number,
+                "admission_type": "General Admission",
                 "status": t.status,
                 "qr_payload": t.qr_payload
             }
@@ -203,7 +236,13 @@ class AgentTools:
                 "booking_reference": booking.booking_reference,
                 "status": booking.status,
                 "quantity_released": booking.quantity,
-                "message": f"Booking {booking.booking_reference} has been cancelled. {booking.quantity} ticket(s) returned to inventory."
+                "refund_amount": f"₹{float(booking.refund_amount):.2f}" if booking.refund_amount is not None else "₹0.00",
+                "refund_status": booking.refund_status,
+                "message": (
+                    f"Booking {booking.booking_reference} has been cancelled. "
+                    f"{booking.quantity} ticket(s) returned to inventory. "
+                    f"Refund: ₹{float(booking.refund_amount or 0.0):.2f} ({booking.refund_status})."
+                )
             }
         except Exception as e:
             return {

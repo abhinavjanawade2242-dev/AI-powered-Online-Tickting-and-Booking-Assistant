@@ -144,6 +144,7 @@ class BookingReservationRequest(BaseModel):
     customer_name: str = Field(..., example="John Smith")
     customer_email: EmailStr = Field(..., example="john.smith@example.com")
     customer_phone: Optional[str] = Field(None, example="+1-555-1234")
+    promo_code: Optional[str] = Field(None, description="Optional coupon or promo code (e.g., TECH20, STUDENT10)", example="TECH20")
 
 
 class BookingConfirmRequest(BaseModel):
@@ -241,13 +242,37 @@ class BookingResponse(BaseModel):
 
 
 # ==============================================================================
+# Pricing Schemas
+# ==============================================================================
+
+class PriceQuoteRequest(BaseModel):
+    tier_id: str = Field(..., example="tier-tech-early", description="Ticket tier ID")
+    quantity: int = Field(..., ge=1, le=10, example=2, description="Number of tickets requested")
+    promo_code: Optional[str] = Field(None, example="TECH20", description="Promo discount code (e.g., TECH20, STUDENT10, EARLYBIRD, FREEPASS)")
+
+
+class PriceQuoteResponse(BaseModel):
+    unit_price: float
+    quantity: int
+    base_amount: float
+    discount_amount: float
+    discount_description: Optional[str] = None
+    convenience_fee: float
+    tax_amount: float
+    total_payable: float
+    currency: str = "INR"
+    is_free: bool
+
+
+# ==============================================================================
 # AI Conversational Chat Schemas
 # ==============================================================================
 
 class ChatRequest(BaseModel):
-    message: str = Field(..., example="Find jazz concerts in Chicago this Friday")
+    message: str = Field(..., example="Find tech events in Bengaluru")
     session_id: Optional[str] = Field(None, description="Session ID for ongoing conversation context")
     user_id: Optional[str] = Field(None, description="Optional identified user ID")
+    language: Optional[str] = Field("en", description="Preferred language: 'en' (English), 'kn' (Kannada), 'hi' (Hindi)")
 
 
 class ChatActionSuggestion(BaseModel):
@@ -260,6 +285,7 @@ class ChatResponse(BaseModel):
     session_id: str
     message: str
     current_stage: str = Field(..., description="One of: Discovery, Recommendation, Availability, Selection, Booking, Confirmation, Post-booking")
+    language: str = Field(default="en", description="Response language: 'en', 'kn', or 'hi'")
     context_data: Dict[str, Any] = {}
     suggested_actions: List[ChatActionSuggestion] = []
     tool_calls_executed: List[str] = []

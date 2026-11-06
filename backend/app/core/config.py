@@ -18,6 +18,17 @@ class Settings(BaseSettings):
     LOCK_EXPIRY_SECONDS: int = 10
     RESERVATION_HOLD_TTL_SECONDS: int = 600  # 10 minutes temporary hold
 
+    # Business Rules & Pricing Engine Defaults (Configurable by Admin)
+    MAX_TICKETS_PER_BOOKING: int = 6       # Maximum tickets allowed in a single reservation
+    HOLD_DURATION_MINUTES: int = 10        # Configurable reservation hold duration in minutes
+    CANCELLATION_WINDOW_HOURS: int = 24    # 24-hour advance cancellation rule
+    DEFAULT_CURRENCY: str = "INR"          # Mandatory platform currency
+    GROUP_DISCOUNT_THRESHOLD: int = 4      # Quantity threshold for bulk/team group discount
+    GROUP_DISCOUNT_PERCENT: float = 10.0   # 10% discount for group orders (>= 4 tickets)
+    ENABLE_CONVENIENCE_FEE: bool = False   # Set True to charge platform convenience fee
+    PLATFORM_FEE_AMOUNT: float = 0.00      # Zero convenience fee for student events
+    GST_RATE_PERCENT: float = 0.0          # GST percentage (0% for educational/campus events)
+
     # Celery Background Workers
     CELERY_BROKER_URL: str = "redis://localhost:6379/1"
     CELERY_RESULT_BACKEND: str = "redis://localhost:6379/2"

@@ -8,6 +8,8 @@ from app.core.config import settings
 from app.core.security import generate_booking_reference, generate_ticket_code, generate_qr_payload
 from app.models import Booking, TicketTier, Event, User, DigitalTicket
 from app.schemas import BookingReservationRequest, BookingResponse, DigitalTicketResponse, CustomerResponse
+from app.services.business_rules import BusinessRulesEngine
+from app.services.pricing_service import PricingService
 from app.services.concurrency import (
     distributed_lock,
     acquire_ticket_tier_for_update,
@@ -58,6 +60,9 @@ class BookingService:
         Atomically checks inventory, acquires distributed Redis lock + DB row lock,
         decrements available count, and establishes a temporary reservation hold.
         """
+        # 0. Validate business rules (e.g., ticket limits per booking)
+        BusinessRulesEngine.validate_ticket_quantity(req.quantity)
+
         lock_resource = f"tier:{req.tier_id}"
 
         # 1. Acquire Distributed Redis Lock
@@ -71,6 +76,9 @@ class BookingService:
 
             if tier.event_id != req.event_id:
                 raise ValueError("Tier ID does not belong to the specified event ID.")
+
+            # Validate currency constraint
+            BusinessRulesEngine.validate_currency(tier.currency)
 
             # 3. Strict Anti-Overbooking verification
             if tier.available_quantity < req.quantity:
@@ -95,10 +103,16 @@ class BookingService:
                 phone=req.customer_phone
             )
 
-            # 6. Create Booking in PENDING state with hold expiration
+            # 6. Calculate transparent pricing quote (supports promo code, group discounts)
+            price_quote = PricingService.calculate_quote(
+                unit_price=float(tier.price),
+                quantity=req.quantity,
+                promo_code=getattr(req, "promo_code", None)
+            )
+
+            # 7. Create Booking in PENDING state with configurable hold expiration
             booking_ref = generate_booking_reference()
-            hold_expires_at = datetime.utcnow() + timedelta(seconds=settings.RESERVATION_HOLD_TTL_SECONDS)
-            total_amount = float(tier.price) * req.quantity
+            hold_expires_at = BusinessRulesEngine.calculate_hold_expiration(settings.HOLD_DURATION_MINUTES)
 
             booking = Booking(
                 booking_reference=booking_ref,
@@ -107,7 +121,7 @@ class BookingService:
                 tier_id=req.tier_id,
                 quantity=req.quantity,
                 unit_price=tier.price,
-                total_amount=total_amount,
+                total_amount=price_quote.total_payable,
                 currency=tier.currency,
                 status="PENDING",
                 hold_expires_at=hold_expires_at,
@@ -154,11 +168,12 @@ class BookingService:
         if booking.status != "PENDING":
             raise ValueError(f"Booking cannot be confirmed because status is '{booking.status}'.")
 
-        # Check if reservation hold expired
-        if booking.hold_expires_at and datetime.utcnow() > booking.hold_expires_at:
+        # Check if reservation hold expired via BusinessRulesEngine
+        is_valid_cb, cb_msg = BusinessRulesEngine.validate_payment_callback(booking.status, booking.hold_expires_at)
+        if not is_valid_cb:
             booking.status = "EXPIRED"
             await db.commit()
-            raise ValueError("Reservation hold has expired. Please select tickets again.")
+            raise ValueError(cb_msg)
 
         # Finalize booking status
         booking.status = "CONFIRMED"
@@ -231,15 +246,11 @@ class BookingService:
         if booking.status not in ["CONFIRMED", "PENDING"]:
             raise ValueError(f"Booking status is {booking.status}; cannot be cancelled.")
 
-        # Enforce 24-hour cancellation policy for confirmed bookings
+        # Enforce 24-hour cancellation policy for confirmed bookings via BusinessRulesEngine
         if booking.status == "CONFIRMED" and booking.event:
-            now = datetime.utcnow()
-            time_until_event = booking.event.start_time - now
-            if time_until_event < timedelta(hours=24):
-                raise ValueError(
-                    f"Cancellations are only permitted at least 24 hours prior to event start time "
-                    f"(Event starts in {time_until_event.total_seconds() / 3600:.1f} hours)."
-                )
+            is_eligible, policy_msg = BusinessRulesEngine.validate_cancellation_eligibility(booking.event.start_time)
+            if not is_eligible:
+                raise ValueError(policy_msg)
 
         was_confirmed = (booking.status == "CONFIRMED")
 
@@ -256,17 +267,18 @@ class BookingService:
 
             booking.status = "CANCELLED"
             booking.cancellation_reason = reason or "User requested cancellation"
+            refund_amount, refund_status = BusinessRulesEngine.calculate_cancellation_refund(
+                total_amount=booking.total_amount,
+                is_eligible=was_confirmed
+            )
+            booking.refund_amount = refund_amount
+            booking.refund_status = refund_status
             if was_confirmed:
-                booking.refund_amount = booking.total_amount
-                booking.refund_status = "REFUNDED"
                 logger.info(
                     "100%% Sandbox refund of ₹%.2f issued for booking %s",
                     float(booking.total_amount),
                     booking.booking_reference
                 )
-            else:
-                booking.refund_amount = 0.00
-                booking.refund_status = "NONE"
 
             # Void issued digital tickets
             for tix in booking.tickets:

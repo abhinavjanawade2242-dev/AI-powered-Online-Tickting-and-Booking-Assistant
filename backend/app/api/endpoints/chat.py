@@ -45,7 +45,8 @@ async def chat_with_assistant(
             db=db,
             user_message=req.message,
             session_id=req.session_id,
-            user_id=req.user_id
+            user_id=req.user_id,
+            preferred_language=getattr(req, "language", "en")
         )
         return response
     except Exception as e:
