@@ -1,7 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models import User, Booking
 from app.services.booking_service import BookingService
 from app.services.concurrency import InsufficientInventoryError, LockAcquisitionError
 from app.schemas import (
@@ -110,6 +114,30 @@ async def confirm_booking(
         return _serialize_booking(booking)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get("/my-bookings", response_model=list[BookingResponse], summary="Retrieve booking history for authenticated user")
+async def get_my_bookings(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Section 2.D: Retrieve authenticated user's personal booking history.
+    """
+    stmt = (
+        select(Booking)
+        .options(
+            selectinload(Booking.user),
+            selectinload(Booking.ticket_tier),
+            selectinload(Booking.event),
+            selectinload(Booking.tickets)
+        )
+        .where(Booking.user_id == current_user.id)
+        .order_by(Booking.created_at.desc())
+    )
+    result = await db.execute(stmt)
+    bookings = result.scalars().all()
+    return [_serialize_booking(b) for b in bookings]
 
 
 @router.get("/{booking_reference}", response_model=BookingResponse, summary="Stage 7: Retrieve Booking & Digital Tickets")

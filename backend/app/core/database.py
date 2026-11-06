@@ -41,7 +41,22 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    """Initialize database tables asynchronously (creates all models)."""
+    """Initialize database tables asynchronously (creates all models and auto-migrates missing columns)."""
+    from sqlalchemy import text
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+
+        # Resilient SQLite column migration check for local environments
+        if "sqlite" in settings.DATABASE_URL:
+            res = await conn.execute(text("PRAGMA table_info(users)"))
+            cols = [row[1] for row in res.fetchall()]
+            if "password_hash" not in cols:
+                await conn.execute(text("ALTER TABLE users ADD COLUMN password_hash VARCHAR(255)"))
+            if "role" not in cols:
+                await conn.execute(text("ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT 'customer'"))
+            if "preferred_language" not in cols:
+                await conn.execute(text("ALTER TABLE users ADD COLUMN preferred_language VARCHAR(10) DEFAULT 'en'"))
+            if "updated_at" not in cols:
+                await conn.execute(text("ALTER TABLE users ADD COLUMN updated_at DATETIME"))
 

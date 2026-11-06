@@ -73,8 +73,12 @@ class User(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     full_name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
+    password_hash = Column(String(255), nullable=True)  # Nullable for guest checkout compatibility
+    role = Column(String(50), default="customer", nullable=False)  # customer, organizer, admin
+    preferred_language = Column(String(10), default="en", nullable=False)  # en, kn, hi
     phone = Column(String(50), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
     bookings = relationship("Booking", back_populates="user")

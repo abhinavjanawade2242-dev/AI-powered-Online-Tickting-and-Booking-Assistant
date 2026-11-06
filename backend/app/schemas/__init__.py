@@ -125,8 +125,101 @@ class CustomerCreate(CustomerBase):
 
 class CustomerResponse(CustomerBase):
     id: str
+    role: str = "customer"
+    preferred_language: str = "en"
     created_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+
+# ==============================================================================
+# Authentication & User Management Schemas
+# ==============================================================================
+
+class UserRegisterRequest(BaseModel):
+    full_name: str = Field(..., min_length=2, max_length=100, example="Adithya Gowda")
+    email: EmailStr = Field(..., example="adithya@example.com")
+    password: str = Field(..., min_length=6, max_length=100, example="SecurePass123!")
+    phone: Optional[str] = Field(None, example="+91-9876543210")
+    role: Optional[str] = Field("customer", description="Role: customer, organizer, or admin")
+    preferred_language: Optional[str] = Field("en", description="Preferred language: en, kn, or hi")
+
+
+class UserLoginRequest(BaseModel):
+    email: EmailStr = Field(..., example="adithya@example.com")
+    password: str = Field(..., example="SecurePass123!")
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in_minutes: int
+    user_id: str
+    email: str
+    full_name: str
+    role: str
+    preferred_language: str
+
+
+class UserProfileResponse(BaseModel):
+    id: str
+    email: str
+    full_name: str
+    phone: Optional[str] = None
+    role: str
+    preferred_language: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserUpdateRequest(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    preferred_language: Optional[str] = None
+
+
+# ==============================================================================
+# Event Management Operations (Organizer & Admin CRUD)
+# ==============================================================================
+
+class EventCreateRequest(BaseModel):
+    venue_id: str = Field(..., example="venue-tech-hub")
+    title: str = Field(..., min_length=5, max_length=255, example="Bangalore AI & Web3 Summit 2026")
+    description: Optional[str] = Field(None, example="Annual summit bringing together student developers and founders.")
+    category: str = Field(..., example="Technical")
+    start_time: datetime = Field(..., example="2026-12-15T09:00:00")
+    end_time: datetime = Field(..., example="2026-12-15T18:00:00")
+    image_url: Optional[str] = Field(None, example="https://images.unsplash.com/photo-1540575467063-178a50c2df87")
+    ticket_tiers: List[TicketTierCreate] = []
+
+
+class EventUpdateRequest(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    status: Optional[str] = None
+    image_url: Optional[str] = None
+
+
+# ==============================================================================
+# WhatsApp Cloud API Schemas
+# ==============================================================================
+
+class WhatsAppSimulateRequest(BaseModel):
+    sender_phone: str = Field(..., example="919876543210", description="Sender phone number with country code")
+    message: str = Field(..., example="ನಮಸ್ಕಾರ, ಬೆಂಗಳೂರಿನಲ್ಲಿ ನಡೆಯುವ ಹ್ಯಾಕಥಾನ್ ತಿಳಿಸಿ", description="Message text")
+
+
+class WhatsAppSimulateResponse(BaseModel):
+    sender_phone: str
+    session_id: str
+    incoming_message: str
+    assistant_reply: str
+    current_stage: str
+    language: str
+    delivered: bool = True
+    delivery_channel: str = "Meta WhatsApp Cloud API (Simulated)"
 
 
 # ==============================================================================

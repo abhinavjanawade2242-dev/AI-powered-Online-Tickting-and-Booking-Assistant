@@ -40,6 +40,18 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: Optional[str] = None
     GEMINI_MODEL: str = "gemini-1.5-pro"
 
+    # Authentication & JWT Security
+    SECRET_KEY: str = "technovate-super-secret-jwt-key-ps07-2026"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
+
+    # Meta WhatsApp Cloud API Integration
+    WHATSAPP_PHONE_NUMBER_ID: Optional[str] = None
+    WHATSAPP_ACCESS_TOKEN: Optional[str] = None
+    WHATSAPP_VERIFY_TOKEN: str = "technovate_whatsapp_verify_token_2026"
+    WHATSAPP_APP_SECRET: Optional[str] = None
+    WHATSAPP_API_VERSION: str = "v21.0"
+
     # Server settings
     HOST: str = "0.0.0.0"
     PORT: int = 8000

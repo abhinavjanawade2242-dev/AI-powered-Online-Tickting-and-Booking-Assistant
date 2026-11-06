@@ -4,12 +4,17 @@ from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.core.security import require_role
+from app.models import Event, TicketTier, User
 from app.services.event_service import EventService
 from app.schemas import (
     EventResponse,
     EventDetailResponse,
     VenueResponse,
     TicketTierResponse,
+    EventCreateRequest,
+    EventUpdateRequest,
+    TicketTierCreate,
 )
 
 router = APIRouter(prefix="/events", tags=["Stage 1 & 2: Discovery & Recommendation"])
@@ -98,6 +103,137 @@ async def get_event_detail(
         max_price=max_price,
         total_available_tickets=total_avail
     )
+
+
+@router.post("", response_model=EventDetailResponse, status_code=status.HTTP_201_CREATED, summary="Create event (Admin/Organizer)")
+async def create_event(
+    req: EventCreateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "organizer"]))
+):
+    """
+    Section 2.B: Create an event across campus venues.
+    Requires 'admin' or 'organizer' role.
+    """
+    new_event = Event(
+        venue_id=req.venue_id,
+        title=req.title.strip(),
+        description=req.description,
+        category=req.category.strip(),
+        start_time=req.start_time,
+        end_time=req.end_time,
+        image_url=req.image_url,
+        status="ACTIVE"
+    )
+    db.add(new_event)
+    await db.flush()
+
+    for tier_data in req.ticket_tiers:
+        tier = TicketTier(
+            event_id=new_event.id,
+            name=tier_data.name,
+            price=tier_data.price,
+            currency="INR",
+            total_quantity=tier_data.total_quantity,
+            available_quantity=tier_data.total_quantity
+        )
+        db.add(tier)
+
+    await db.commit()
+    refreshed = await EventService.get_event_by_id(db, new_event.id)
+    min_price = min([float(t.price) for t in refreshed.ticket_tiers]) if refreshed.ticket_tiers else 0.0
+    max_price = max([float(t.price) for t in refreshed.ticket_tiers]) if refreshed.ticket_tiers else 0.0
+    total_avail = sum(t.available_quantity for t in refreshed.ticket_tiers)
+
+    return EventDetailResponse(
+        id=refreshed.id,
+        title=refreshed.title,
+        description=refreshed.description,
+        category=refreshed.category,
+        start_time=refreshed.start_time,
+        end_time=refreshed.end_time,
+        status=refreshed.status,
+        image_url=refreshed.image_url,
+        venue_id=refreshed.venue_id,
+        created_at=refreshed.created_at,
+        venue=VenueResponse.model_validate(refreshed.venue) if refreshed.venue else None,
+        ticket_tiers=[TicketTierResponse.model_validate(t) for t in refreshed.ticket_tiers],
+        min_price=min_price,
+        max_price=max_price,
+        total_available_tickets=total_avail
+    )
+
+
+@router.put("/{event_id}", response_model=EventDetailResponse, summary="Update event details (Admin/Organizer)")
+async def update_event(
+    event_id: str,
+    req: EventUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "organizer"]))
+):
+    """
+    Section 2.B: Update event metadata, schedule, or status.
+    """
+    event = await EventService.get_event_by_id(db, event_id)
+    if not event:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found.")
+
+    if req.title is not None:
+        event.title = req.title.strip()
+    if req.description is not None:
+        event.description = req.description
+    if req.category is not None:
+        event.category = req.category.strip()
+    if req.start_time is not None:
+        event.start_time = req.start_time
+    if req.end_time is not None:
+        event.end_time = req.end_time
+    if req.status is not None:
+        event.status = req.status.strip().upper()
+    if req.image_url is not None:
+        event.image_url = req.image_url
+
+    await db.commit()
+    refreshed = await EventService.get_event_by_id(db, event_id)
+    min_price = min([float(t.price) for t in refreshed.ticket_tiers]) if refreshed.ticket_tiers else 0.0
+    max_price = max([float(t.price) for t in refreshed.ticket_tiers]) if refreshed.ticket_tiers else 0.0
+    total_avail = sum(t.available_quantity for t in refreshed.ticket_tiers)
+
+    return EventDetailResponse(
+        id=refreshed.id,
+        title=refreshed.title,
+        description=refreshed.description,
+        category=refreshed.category,
+        start_time=refreshed.start_time,
+        end_time=refreshed.end_time,
+        status=refreshed.status,
+        image_url=refreshed.image_url,
+        venue_id=refreshed.venue_id,
+        created_at=refreshed.created_at,
+        venue=VenueResponse.model_validate(refreshed.venue) if refreshed.venue else None,
+        ticket_tiers=[TicketTierResponse.model_validate(t) for t in refreshed.ticket_tiers],
+        min_price=min_price,
+        max_price=max_price,
+        total_available_tickets=total_avail
+    )
+
+
+@router.delete("/{event_id}", summary="Deactivate event (Admin/Organizer)")
+async def deactivate_event(
+    event_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role(["admin", "organizer"]))
+):
+    """
+    Section 2.B: Deactivate an event (removes from public discovery).
+    """
+    event = await EventService.get_event_by_id(db, event_id)
+    if not event:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found.")
+
+    event.status = "INACTIVE"
+    await db.commit()
+    return {"message": f"Event '{event.title}' successfully deactivated."}
 
 
 venues_router = APIRouter(prefix="/venues", tags=["Stage 1 & 2: Venues"])

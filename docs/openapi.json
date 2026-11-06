@@ -6,6 +6,162 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "Section A: Authentication & User Management"
+        ],
+        "summary": "Register customer/organizer account",
+        "description": "Section 2.A: Register a new customer, organizer, or admin user.\n- Hashes password securely using bcrypt.\n- Generates signed JWT access token.",
+        "operationId": "register_user_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Section A: Authentication & User Management"
+        ],
+        "summary": "Authenticate and obtain JWT bearer token",
+        "description": "Section 2.A: Authenticate registered user credentials.\n- Verifies bcrypt password hash.\n- Issues a signed JWT access token.",
+        "operationId": "login_user_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "Section A: Authentication & User Management"
+        ],
+        "summary": "Get current user profile (Protected)",
+        "description": "Section 2.A: Retrieve current authenticated user profile.\nRequires Bearer token authorization header.",
+        "operationId": "get_my_profile_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Section A: Authentication & User Management"
+        ],
+        "summary": "Update current user profile (Protected)",
+        "description": "Section 2.A: Update current user's profile details.",
+        "operationId": "update_my_profile_api_v1_auth_me_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/events": {
       "get": {
         "tags": [
@@ -211,6 +367,51 @@
             }
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Stage 1 & 2: Discovery & Recommendation"
+        ],
+        "summary": "Create event (Admin/Organizer)",
+        "description": "Section 2.B: Create an event across campus venues.\nRequires 'admin' or 'organizer' role.",
+        "operationId": "create_event_api_v1_events_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/events/recommendations": {
@@ -325,6 +526,106 @@
                 "schema": {
                   "$ref": "#/components/schemas/EventDetailResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Stage 1 & 2: Discovery & Recommendation"
+        ],
+        "summary": "Update event details (Admin/Organizer)",
+        "description": "Section 2.B: Update event metadata, schedule, or status.",
+        "operationId": "update_event_api_v1_events__event_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Stage 1 & 2: Discovery & Recommendation"
+        ],
+        "summary": "Deactivate event (Admin/Organizer)",
+        "description": "Section 2.B: Deactivate an event (removes from public discovery).",
+        "operationId": "deactivate_event_api_v1_events__event_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -595,6 +896,37 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/bookings/my-bookings": {
+      "get": {
+        "tags": [
+          "Stage 4, 5, 6 & 7: Booking & Lifecycle"
+        ],
+        "summary": "Retrieve booking history for authenticated user",
+        "description": "Section 2.D: Retrieve authenticated user's personal booking history.",
+        "operationId": "get_my_bookings_api_v1_bookings_my_bookings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BookingResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get My Bookings Api V1 Bookings My Bookings Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/bookings/{booking_reference}": {
@@ -1129,6 +1461,174 @@
         }
       }
     },
+    "/api/v1/whatsapp/webhook": {
+      "get": {
+        "tags": [
+          "Section H: WhatsApp Integration Channel"
+        ],
+        "summary": "Meta WhatsApp Webhook Verification Challenge",
+        "description": "Section 2.H: Meta WhatsApp Cloud API Webhook Verification.\nMeta sends a GET request with hub.mode, hub.verify_token, and hub.challenge.\nMust return hub.challenge with HTTP 200 when verify_token matches.",
+        "operationId": "verify_whatsapp_webhook_api_v1_whatsapp_webhook_get",
+        "parameters": [
+          {
+            "name": "hub.mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Hub.Mode"
+            }
+          },
+          {
+            "name": "hub.verify_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Hub.Verify Token"
+            }
+          },
+          {
+            "name": "hub.challenge",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Hub.Challenge"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Section H: WhatsApp Integration Channel"
+        ],
+        "summary": "Receive Meta WhatsApp Cloud API Webhook Events",
+        "description": "Section 2.H: Receive and process incoming WhatsApp messages.\n- Validates HMAC-SHA256 signature against app secret.\n- Deduplicates incoming message IDs.\n- Maps sender phone to stable chat session (wa_{phone}).\n- Forwards to existing AI Conversational Agent.",
+        "operationId": "receive_whatsapp_webhook_api_v1_whatsapp_webhook_post",
+        "parameters": [
+          {
+            "name": "X-Hub-Signature-256",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Hub-Signature-256"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/whatsapp/simulate": {
+      "post": {
+        "tags": [
+          "Section H: WhatsApp Integration Channel"
+        ],
+        "summary": "Simulate WhatsApp Message (QA & Local Test)",
+        "description": "Section 2.H: Developer & QA Simulator.\nSimulates receiving an inbound WhatsApp message from a phone number,\nrouting it through the existing AI agent, and generating the outbound reply.",
+        "operationId": "simulate_whatsapp_message_api_v1_whatsapp_simulate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WhatsAppSimulateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhatsAppSimulateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/web": {
       "get": {
         "tags": [
@@ -1613,6 +2113,16 @@
             "type": "string",
             "title": "Id"
           },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "default": "customer"
+          },
+          "preferred_language": {
+            "type": "string",
+            "title": "Preferred Language",
+            "default": "en"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -1677,6 +2187,80 @@
           "issued_at"
         ],
         "title": "DigitalTicketResponse"
+      },
+      "EventCreateRequest": {
+        "properties": {
+          "venue_id": {
+            "type": "string",
+            "title": "Venue Id",
+            "example": "venue-tech-hub"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 5,
+            "title": "Title",
+            "example": "Bangalore AI & Web3 Summit 2026"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "example": "Annual summit bringing together student developers and founders."
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "example": "Technical"
+          },
+          "start_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start Time",
+            "example": "2026-12-15T09:00:00"
+          },
+          "end_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End Time",
+            "example": "2026-12-15T18:00:00"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url",
+            "example": "https://images.unsplash.com/photo-1540575467063-178a50c2df87"
+          },
+          "ticket_tiers": {
+            "items": {
+              "$ref": "#/components/schemas/TicketTierCreate"
+            },
+            "type": "array",
+            "title": "Ticket Tiers",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "venue_id",
+          "title",
+          "category",
+          "start_time",
+          "end_time"
+        ],
+        "title": "EventCreateRequest"
       },
       "EventDetailResponse": {
         "properties": {
@@ -1884,6 +2468,91 @@
           "created_at"
         ],
         "title": "EventResponse"
+      },
+      "EventUpdateRequest": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Time"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          }
+        },
+        "type": "object",
+        "title": "EventUpdateRequest"
       },
       "HTTPValidationError": {
         "properties": {
@@ -2303,6 +2972,40 @@
         ],
         "title": "TicketTierAvailability"
       },
+      "TicketTierCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "example": "General Admission"
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Price",
+            "example": 850.0
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "default": "INR",
+            "example": "INR"
+          },
+          "total_quantity": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Total Quantity",
+            "example": 500
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "price",
+          "total_quantity"
+        ],
+        "title": "TicketTierCreate"
+      },
       "TicketTierResponse": {
         "properties": {
           "name": {
@@ -2397,6 +3100,233 @@
           "message"
         ],
         "title": "TicketVerifyResponse"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "expires_in_minutes": {
+            "type": "integer",
+            "title": "Expires In Minutes"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "preferred_language": {
+            "type": "string",
+            "title": "Preferred Language"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "expires_in_minutes",
+          "user_id",
+          "email",
+          "full_name",
+          "role",
+          "preferred_language"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserLoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "example": "adithya@example.com"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "example": "SecurePass123!"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "UserLoginRequest"
+      },
+      "UserProfileResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "preferred_language": {
+            "type": "string",
+            "title": "Preferred Language"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "full_name",
+          "role",
+          "preferred_language",
+          "created_at"
+        ],
+        "title": "UserProfileResponse"
+      },
+      "UserRegisterRequest": {
+        "properties": {
+          "full_name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Full Name",
+            "example": "Adithya Gowda"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "example": "adithya@example.com"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 6,
+            "title": "Password",
+            "example": "SecurePass123!"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone",
+            "example": "+91-9876543210"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role",
+            "description": "Role: customer, organizer, or admin",
+            "default": "customer"
+          },
+          "preferred_language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Language",
+            "description": "Preferred language: en, kn, or hi",
+            "default": "en"
+          }
+        },
+        "type": "object",
+        "required": [
+          "full_name",
+          "email",
+          "password"
+        ],
+        "title": "UserRegisterRequest"
+      },
+      "UserUpdateRequest": {
+        "properties": {
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "preferred_language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Language"
+          }
+        },
+        "type": "object",
+        "title": "UserUpdateRequest"
       },
       "ValidationError": {
         "properties": {
@@ -2505,6 +3435,82 @@
           "created_at"
         ],
         "title": "VenueResponse"
+      },
+      "WhatsAppSimulateRequest": {
+        "properties": {
+          "sender_phone": {
+            "type": "string",
+            "title": "Sender Phone",
+            "description": "Sender phone number with country code",
+            "example": "919876543210"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Message text",
+            "example": "\u0ca8\u0cae\u0cb8\u0ccd\u0c95\u0cbe\u0cb0, \u0cac\u0cc6\u0c82\u0c97\u0cb3\u0cc2\u0cb0\u0cbf\u0ca8\u0cb2\u0ccd\u0cb2\u0cbf \u0ca8\u0ca1\u0cc6\u0caf\u0cc1\u0cb5 \u0cb9\u0ccd\u0caf\u0cbe\u0c95\u0ca5\u0cbe\u0ca8\u0ccd \u0ca4\u0cbf\u0cb3\u0cbf\u0cb8\u0cbf"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sender_phone",
+          "message"
+        ],
+        "title": "WhatsAppSimulateRequest"
+      },
+      "WhatsAppSimulateResponse": {
+        "properties": {
+          "sender_phone": {
+            "type": "string",
+            "title": "Sender Phone"
+          },
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "incoming_message": {
+            "type": "string",
+            "title": "Incoming Message"
+          },
+          "assistant_reply": {
+            "type": "string",
+            "title": "Assistant Reply"
+          },
+          "current_stage": {
+            "type": "string",
+            "title": "Current Stage"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          },
+          "delivered": {
+            "type": "boolean",
+            "title": "Delivered",
+            "default": true
+          },
+          "delivery_channel": {
+            "type": "string",
+            "title": "Delivery Channel",
+            "default": "Meta WhatsApp Cloud API (Simulated)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sender_phone",
+          "session_id",
+          "incoming_message",
+          "assistant_reply",
+          "current_stage",
+          "language"
+        ],
+        "title": "WhatsAppSimulateResponse"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }
