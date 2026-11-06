@@ -1,4 +1,4 @@
-﻿# PS-07 Developer Handoff Documents
+# PS-07 Developer Handoff Documents
 
 This folder contains the agreed project specifications for our
 AI-powered Online Ticketing and Booking Assistant.
