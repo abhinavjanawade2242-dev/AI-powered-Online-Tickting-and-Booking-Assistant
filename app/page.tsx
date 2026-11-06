@@ -2,6 +2,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Image from "next/image";
+
 import {
     Search,
     MapPin,
@@ -158,15 +160,12 @@ export default function Home() {
                 const location = event.location.toLowerCase();
 
                 return (
-                    (text.includes("mysuru") || text.includes("mysore")
-                        ? location.includes("mysuru")
-                        : false) ||
-                    (text.includes("bengaluru") || text.includes("bangalore")
-                        ? location.includes("bengaluru")
-                        : false) ||
-                    (text.includes("mangaluru")
-                        ? location.includes("mangaluru")
-                        : false)
+                    ((text.includes("mysuru") || text.includes("mysore")) &&
+                        location.includes("mysuru")) ||
+                    ((text.includes("bengaluru") || text.includes("bangalore")) &&
+                        location.includes("bengaluru")) ||
+                    (text.includes("mangaluru") &&
+                        location.includes("mangaluru"))
                 );
             });
 
@@ -208,9 +207,7 @@ export default function Home() {
         }
 
         const matchingCategory = categories.find(
-            (item) =>
-                item !== "All" &&
-                text.includes(item.toLowerCase())
+            (item) => item !== "All" && text.includes(item.toLowerCase())
         );
 
         if (matchingCategory) {
@@ -226,10 +223,7 @@ export default function Home() {
                 .join("\n")}\n\nSelect an event to explore tickets.`;
         }
 
-        if (
-            text.includes("help") ||
-            text.includes("how")
-        ) {
+        if (text.includes("help") || text.includes("how")) {
             return "I can help you with:\n\n• Finding upcoming events\n• Checking event locations and prices\n• Understanding seat selection\n• Getting booking instructions\n• Learning about checkout\n\nWhat would you like to know?";
         }
 
@@ -271,16 +265,13 @@ export default function Home() {
 
     return (
         <main className="homepage-animated relative isolate min-h-screen overflow-hidden bg-[#080814] text-slate-100">
-
             {/* Header */}
             <header className="sticky top-0 z-30 border-b border-white/10 bg-[#0b0b1b]/90 backdrop-blur-xl">
                 <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4">
-
                     <a href="#home" className="flex items-center gap-2">
                         <span className="rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 p-2 text-white shadow-lg shadow-violet-500/30">
                             <Ticket size={23} />
                         </span>
-
                         <span className="text-lg font-extrabold tracking-tight text-white sm:text-xl">
                             Ticket<span className="text-violet-400">Ease</span>
                         </span>
@@ -290,11 +281,9 @@ export default function Home() {
                         <a href="#home" className="transition hover:text-violet-400">
                             Home
                         </a>
-
                         <a href="#events" className="transition hover:text-violet-400">
                             Explore Events
                         </a>
-
                         <button
                             onClick={() => setChatOpen(true)}
                             className="transition hover:text-violet-400"
@@ -322,7 +311,6 @@ export default function Home() {
                 <div className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-fuchsia-500/15 blur-[100px]" />
 
                 <div className="relative mx-auto grid max-w-7xl items-center gap-6 lg:grid-cols-2 lg:gap-10">
-
                     <div className="max-w-none">
                         <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-violet-400/30 bg-violet-500/10 px-3 py-2 text-xs text-violet-200 shadow-lg shadow-violet-500/10 sm:mb-6 sm:px-4 sm:text-sm">
                             <Sparkles size={16} className="text-violet-400" />
@@ -346,7 +334,6 @@ export default function Home() {
                         <div className="mt-7 flex w-full max-w-2xl flex-col gap-2 rounded-2xl border border-violet-400/20 bg-[#17152b]/90 p-2 shadow-2xl shadow-violet-950/40 backdrop-blur-xl sm:mt-9 sm:flex-row sm:gap-3 sm:p-3">
                             <div className="flex flex-1 items-center gap-3 px-3">
                                 <Search className="shrink-0 text-violet-400" />
-
                                 <input
                                     value={search}
                                     onChange={(event) => setSearch(event.target.value)}
@@ -374,12 +361,10 @@ export default function Home() {
                                 <Ticket size={17} className="text-violet-400" />
                                 Easy ticket booking
                             </span>
-
                             <span className="flex items-center gap-2">
                                 <Sparkles size={17} className="text-violet-400" />
                                 AI assistance
                             </span>
-
                             <span className="flex items-center gap-2">
                                 <CalendarDays size={17} className="text-violet-400" />
                                 Upcoming events
@@ -406,11 +391,9 @@ export default function Home() {
                         <p className="mb-2 text-sm font-bold uppercase tracking-wider text-violet-400">
                             Discover something exciting
                         </p>
-
                         <h2 className="text-2xl font-extrabold text-white sm:text-3xl">
                             Upcoming Events
                         </h2>
-
                         <p className="mt-2 text-slate-400">
                             Find and book tickets for events you love.
                         </p>
@@ -428,10 +411,11 @@ export default function Home() {
                             key={item}
                             onClick={() => setCategory(item)}
                             aria-pressed={category === item}
-                            className={`shrink-0 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${category === item
+                            className={`shrink-0 rounded-full border px-4 py-2.5 text-sm font-semibold transition-all duration-300 ${
+                                category === item
                                     ? "border-violet-500 bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-600/20"
                                     : "border-white/10 bg-[#151526] text-slate-400 hover:border-violet-500/50 hover:bg-violet-500/10 hover:text-violet-300"
-                                }`}
+                            }`}
                         >
                             {item}
                         </button>
@@ -442,10 +426,8 @@ export default function Home() {
                 {selectedEventDetails && (
                     <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-violet-500/30 bg-violet-500/10 p-4">
                         <p className="text-sm font-medium text-violet-200">
-                            Selected event:{" "}
-                            <strong>{selectedEventDetails.name}</strong>
+                            Selected event: <strong>{selectedEventDetails.name}</strong>
                         </p>
-
                         <button
                             onClick={() => setSelectedEvent(null)}
                             className="text-sm font-semibold text-violet-400 underline"
@@ -461,23 +443,22 @@ export default function Home() {
                         {filteredEvents.map((event, index) => (
                             <article
                                 key={event.id}
-                                style={{
-                                    animationDelay: `${index * 120}ms`,
-                                }}
+                                style={{ animationDelay: `${index * 120}ms` }}
                                 className="event-card-3d group relative overflow-hidden rounded-2xl border border-violet-400/15 bg-[#131326] shadow-xl shadow-black/30 transition-all duration-500 hover:-translate-y-3 hover:border-violet-400/60 hover:shadow-2xl hover:shadow-violet-600/20"
                             >
                                 <div className="pointer-events-none absolute inset-0 z-10 rounded-2xl bg-gradient-to-br from-violet-500/0 via-fuchsia-500/0 to-indigo-500/0 opacity-0 transition duration-500 group-hover:from-violet-500/10 group-hover:via-fuchsia-500/5 group-hover:to-indigo-500/10 group-hover:opacity-100" />
 
                                 <div className="relative h-48 overflow-hidden sm:h-52">
-                                    <img
+                                    <Image
                                         src={event.image}
                                         alt={event.name}
-                                        loading="lazy"
-                                        className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:rotate-1"
+                                        fill
+                                        unoptimized
+                                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                        className="object-cover transition-all duration-700 ease-out group-hover:scale-110 group-hover:rotate-1"
                                     />
 
                                     <div className="absolute inset-0 bg-gradient-to-t from-[#090914] via-black/10 to-transparent" />
-
                                     <div className="absolute inset-0 bg-violet-600/0 transition duration-500 group-hover:bg-violet-600/10" />
 
                                     <span className="absolute left-4 top-4 rounded-full border border-violet-300/30 bg-[#17152b]/85 px-3 py-1.5 text-xs font-bold text-violet-200 shadow-lg shadow-violet-950/30 backdrop-blur-xl transition duration-500 group-hover:-translate-y-1 group-hover:border-violet-300/70 group-hover:bg-violet-600/80 group-hover:text-white">
@@ -494,7 +475,6 @@ export default function Home() {
                                     <h3 className="text-lg font-bold text-white transition-all duration-300 group-hover:translate-x-1 group-hover:text-violet-300">
                                         {event.name}
                                     </h3>
-
                                     <p className="mt-2 min-h-10 text-sm leading-5 text-slate-400">
                                         {event.description}
                                     </p>
@@ -504,12 +484,10 @@ export default function Home() {
                                             <CalendarDays size={17} className="shrink-0 text-violet-400" />
                                             {event.date}
                                         </p>
-
                                         <p className="flex items-center gap-2 transition-colors group-hover:text-slate-200">
                                             <Clock size={17} className="shrink-0 text-violet-400" />
                                             {event.time}
                                         </p>
-
                                         <p className="flex items-center gap-2 transition-colors group-hover:text-slate-200">
                                             <MapPin size={17} className="shrink-0 text-violet-400" />
                                             {event.location}
@@ -518,10 +496,7 @@ export default function Home() {
 
                                     <div className="mt-5 flex items-center justify-between gap-2 border-t border-white/10 pt-4">
                                         <div>
-                                            <p className="text-xs text-slate-500">
-                                                Starting from
-                                            </p>
-
+                                            <p className="text-xs text-slate-500">Starting from</p>
                                             <p className="text-xl font-extrabold text-violet-300">
                                                 ₹{event.price.toLocaleString("en-IN")}
                                             </p>
@@ -530,7 +505,6 @@ export default function Home() {
                                         <button
                                             onClick={() => {
                                                 setSelectedEvent(event.id);
-
                                                 setTimeout(() => {
                                                     document
                                                         .getElementById("seat-selection")
@@ -540,7 +514,6 @@ export default function Home() {
                                             className="group/btn flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-3 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-600/20 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-violet-500/40 active:scale-95 sm:px-4"
                                         >
                                             Select Tickets
-
                                             <ArrowRight
                                                 size={16}
                                                 className="transition-transform duration-300 group-hover/btn:translate-x-1"
@@ -554,15 +527,12 @@ export default function Home() {
                 ) : (
                     <div className="rounded-2xl border border-dashed border-white/20 bg-[#131326] py-16 text-center">
                         <Search size={35} className="mx-auto text-slate-500" />
-
                         <h3 className="mt-4 text-lg font-bold text-white">
                             No events found
                         </h3>
-
                         <p className="mt-2 text-sm text-slate-400">
                             Try another event name, location, or category.
                         </p>
-
                         <button
                             onClick={() => {
                                 setSearch("");
@@ -599,11 +569,9 @@ export default function Home() {
                         <p className="font-bold tracking-wider text-violet-400">
                             NEED HELP?
                         </p>
-
                         <h2 className="mt-2 text-2xl font-extrabold text-white">
                             Let AI help you find your next event.
                         </h2>
-
                         <p className="mt-2 text-sm text-slate-400">
                             Ask questions about events and ticket booking.
                         </p>
@@ -629,14 +597,12 @@ export default function Home() {
             {/* Chatbot */}
             {chatOpen && (
                 <div className="chat-window fixed bottom-3 right-3 z-50 flex h-[min(70dvh,560px)] max-h-[calc(100dvh-24px)] w-[calc(100vw-24px)] max-w-[420px] flex-col overflow-hidden rounded-2xl border border-violet-400/30 bg-[#111124] shadow-2xl shadow-violet-950/50 sm:bottom-5 sm:right-5 sm:h-[min(620px,calc(100dvh-40px))] sm:w-[min(420px,calc(100vw-40px))]">
-
                     {/* Chat Header */}
                     <div className="flex shrink-0 items-center justify-between border-b border-white/10 bg-gradient-to-r from-violet-700 to-indigo-700 p-3 text-white sm:p-4">
                         <div className="flex items-center gap-3">
                             <div className="rounded-xl bg-white/15 p-2">
                                 <MessageCircle size={21} />
                             </div>
-
                             <div>
                                 <p className="font-bold">TicketEase Assistant</p>
                                 <p className="flex items-center gap-1.5 text-xs text-violet-200">
@@ -663,16 +629,16 @@ export default function Home() {
                         {chatMessages.map((item, index) => (
                             <div
                                 key={index}
-                                className={`chat-message flex ${item.role === "user"
-                                        ? "justify-end"
-                                        : "justify-start"
-                                    }`}
+                                className={`chat-message flex ${
+                                    item.role === "user" ? "justify-end" : "justify-start"
+                                }`}
                             >
                                 <div
-                                    className={`max-w-[88%] whitespace-pre-line rounded-2xl border p-3 text-sm leading-6 ${item.role === "user"
+                                    className={`max-w-[88%] whitespace-pre-line rounded-2xl border p-3 text-sm leading-6 ${
+                                        item.role === "user"
                                             ? "rounded-br-sm border-violet-400/30 bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-900/20"
                                             : "rounded-bl-sm border-white/10 bg-[#1a1a31] text-slate-200"
-                                        }`}
+                                    }`}
                                 >
                                     {item.text}
                                 </div>
@@ -699,7 +665,6 @@ export default function Home() {
                                 <p className="mb-3 text-xs font-semibold text-slate-500">
                                     QUICK SUGGESTIONS
                                 </p>
-
                                 <div className="flex flex-wrap gap-2">
                                     {[
                                         "Find Events",
@@ -736,7 +701,6 @@ export default function Home() {
                             disabled={isTyping}
                             className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#1b1b32] px-3 py-3 text-sm text-white outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 disabled:opacity-50"
                         />
-
                         <button
                             type="submit"
                             disabled={!message.trim() || isTyping}

@@ -180,3 +180,131 @@ async def test_free_event_booking_and_confirmation(client: AsyncClient, db_sessi
     assert len(confirmed["tickets"]) == 2
     assert confirmed["tickets"][0]["ticket_code"].startswith("TIX-")
 
+
+async def _create_payment_test_booking(client, sample_event_data, email):
+    """Create a fresh booking for payment simulation tests."""
+    event_id = sample_event_data["event"].id
+    tier_id = sample_event_data["tier_vip"].id
+
+    response = await client.post(
+        "/api/v1/bookings/reserve",
+        json={
+            "event_id": event_id,
+            "tier_id": tier_id,
+            "quantity": 2,
+            "customer_name": "Payment QA Tester",
+            "customer_email": email,
+            "customer_phone": "9876543210",
+        },
+    )
+
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+@pytest.mark.asyncio
+async def test_payment_simulation_success(client, sample_event_data):
+    """SUCCESS: Payment confirms booking and generates tickets."""
+    booking = await _create_payment_test_booking(
+        client, sample_event_data, "payment.success@example.com"
+    )
+
+    response = await client.post(
+        f"/api/v1/bookings/{booking['booking_reference']}/payment-simulation",
+        json={
+            "simulated_outcome": "SUCCESS",
+            "payment_method": "SIMULATED_UPI",
+        },
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+
+    assert data["payment_status"] == "SUCCESS"
+    assert data["status"] == "CONFIRMED"
+    assert len(data["tickets"]) == 2
+
+
+@pytest.mark.asyncio
+async def test_payment_simulation_failure(client, sample_event_data):
+    """FAILURE: Booking remains unconfirmed and its hold is retained."""
+    booking = await _create_payment_test_booking(
+        client, sample_event_data, "payment.failure@example.com"
+    )
+
+    response = await client.post(
+        f"/api/v1/bookings/{booking['booking_reference']}/payment-simulation",
+        json={
+            "simulated_outcome": "FAILURE",
+            "payment_method": "SIMULATED_UPI",
+        },
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+
+    assert data["payment_status"] == "FAILED"
+    assert data["status"] == "PENDING"
+    assert data["tickets"] == []
+
+
+@pytest.mark.asyncio
+async def test_payment_simulation_pending(client, sample_event_data):
+    """PENDING: Booking enters PAYMENT_PENDING state."""
+    booking = await _create_payment_test_booking(
+        client, sample_event_data, "payment.pending@example.com"
+    )
+
+    response = await client.post(
+        f"/api/v1/bookings/{booking['booking_reference']}/payment-simulation",
+        json={
+            "simulated_outcome": "PENDING",
+            "payment_method": "SIMULATED_UPI",
+        },
+    )
+
+    assert response.status_code == 200, response.text
+    data = response.json()
+
+    assert data["payment_status"] == "PENDING"
+    assert data["status"] == "PAYMENT_PENDING"
+    assert data["tickets"] == []
+
+
+@pytest.mark.asyncio
+async def test_payment_pending_then_success(client, sample_event_data):
+    """PENDING -> SUCCESS: A pending payment can later be confirmed."""
+    booking = await _create_payment_test_booking(
+        client, sample_event_data, "payment.retry@example.com"
+    )
+
+    booking_ref = booking["booking_reference"]
+
+    # First simulate a pending payment.
+    pending_response = await client.post(
+        f"/api/v1/bookings/{booking_ref}/payment-simulation",
+        json={
+            "simulated_outcome": "PENDING",
+            "payment_method": "SIMULATED_UPI",
+        },
+    )
+
+    assert pending_response.status_code == 200
+    assert pending_response.json()["status"] == "PAYMENT_PENDING"
+
+    # Then simulate successful payment reconciliation.
+    success_response = await client.post(
+        f"/api/v1/bookings/{booking_ref}/payment-simulation",
+        json={
+            "simulated_outcome": "SUCCESS",
+            "payment_method": "SIMULATED_UPI",
+        },
+    )
+
+    assert success_response.status_code == 200, success_response.text
+
+    data = success_response.json()
+
+    assert data["payment_status"] == "SUCCESS"
+    assert data["status"] == "CONFIRMED"
+    assert len(data["tickets"]) == 2
