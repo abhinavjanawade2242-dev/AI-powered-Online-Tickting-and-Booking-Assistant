@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎫 AI-Powered Online Ticketing & Booking Assistant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+    .glass { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .stage-pill.active { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; font-weight: 600; box-shadow: 0 0 12px rgba(139, 92, 246, 0.5); }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col antialiased">
+
+  <!-- Top Navbar -->
+  <header class="border-b border-gray-800 bg-gray-900/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="text-3xl">🎫</span>
+        <div>
+          <h1 class="text-lg font-bold bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            AI Ticketing & Booking Assistant
+          </h1>
+          <p class="text-xs text-gray-400">Anti-Overbooking Concurrency & Multi-Turn AI Concierge</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-4">
+        <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-950 text-emerald-400 border border-emerald-800">
+          <span class="w-2 h-2 mr-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+          System Online
+        </span>
+        <span class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-950 text-indigo-400 border border-indigo-800">
+          <i class="fas fa-lock mr-1.5 text-xs"></i>
+          Redis Anti-Overbooking
+        </span>
+        <a href="/docs" target="_blank" class="px-3 py-1.5 text-xs font-medium bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg border border-gray-700 transition flex items-center">
+          <i class="fas fa-book-open mr-1.5"></i> Swagger API Docs
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 7-Stage Journey Ribbon -->
+  <nav class="bg-gray-900/60 border-b border-gray-800/80 px-4 py-2.5 overflow-x-auto scrollbar-thin">
+    <div class="max-w-7xl mx-auto flex items-center justify-between text-xs space-x-2 min-w-[750px]">
+      <span class="text-gray-400 font-semibold uppercase tracking-wider text-[10px] mr-2">Lifecycle Stage:</span>
+      <div id="stage-Discovery" class="stage-pill active px-3 py-1 rounded-full text-gray-400 transition cursor-default">1. Discovery</div>
+      <i class="fas fa-chevron-right text-gray-700 text-[10px]"></i>
+      <div id="stage-Recommendation" class="stage-pill px-3 py-1 rounded-full text-gray-400 transition cursor-default">2. Recommendation</div>
+      <i class="fas fa-chevron-right text-gray-700 text-[10px]"></i>
+      <div id="stage-Availability" class="stage-pill px-3 py-1 rounded-full text-gray-400 transition cursor-default">3. Availability</div>
+      <i class="fas fa-chevron-right text-gray-700 text-[10px]"></i>
+      <div id="stage-Selection" class="stage-pill px-3 py-1 rounded-full text-gray-400 transition cursor-default">4. Selection</div>
+      <i class="fas fa-chevron-right text-gray-700 text-[10px]"></i>
+      <div id="stage-Booking" class="stage-pill px-3 py-1 rounded-full text-gray-400 transition cursor-default">5. Booking (Hold)</div>
+      <i class="fas fa-chevron-right text-gray-700 text-[10px]"></i>
+      <div id="stage-Confirmation" class="stage-pill px-3 py-1 rounded-full text-gray-400 transition cursor-default">6. Confirmation</div>
+      <i class="fas fa-chevron-right text-gray-700 text-[10px]"></i>
+      <div id="stage-Post-booking" class="stage-pill px-3 py-1 rounded-full text-gray-400 transition cursor-default">7. Post-Booking</div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Panel: AI Conversational Concierge (5 cols) -->
+    <section class="lg:col-span-5 flex flex-col h-[750px] glass rounded-2xl shadow-2xl overflow-hidden border border-gray-800">
+      <!-- Chat Header -->
+      <div class="px-5 py-4 border-b border-gray-800/80 bg-gray-900/50 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-lg">
+            <i class="fas fa-robot text-sm"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-semibold text-gray-200">AI Ticketing Concierge</h2>
+            <p class="text-[11px] text-emerald-400 flex items-center">
+              <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-1.5"></span> Ready to assist
+            </p>
+          </div>
+        </div>
+        <button onclick="resetChat()" title="Reset Session" class="text-xs text-gray-400 hover:text-gray-200 p-1.5 rounded-lg hover:bg-gray-800 transition">
+          <i class="fas fa-rotate-right"></i>
+        </button>
+      </div>
+
+      <!-- Chat History -->
+      <div id="chatHistory" class="flex-1 p-4 overflow-y-auto space-y-4 scrollbar-thin">
+        <!-- Greeting -->
+        <div class="flex items-start space-x-3">
+          <div class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center shrink-0 text-xs">
+            🤖
+          </div>
+          <div class="bg-gray-800/90 border border-gray-700/60 rounded-2xl rounded-tl-sm px-4 py-3 text-xs leading-relaxed max-w-[85%] text-gray-200">
+            👋 Welcome! I am your AI Booking Concierge. I can help you <strong>find upcoming events</strong>, check <strong>real-time seat inventory</strong>, and book verified tickets with zero-overbooking protection.
+            <div class="mt-2 text-gray-400">What event or city are you looking for today?</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Pills -->
+      <div id="quickActions" class="px-4 py-2 bg-gray-900/40 border-t border-gray-800 flex items-center space-x-2 overflow-x-auto scrollbar-thin">
+        <button onclick="sendQuickMessage('Find concerts in New York')" class="shrink-0 px-3 py-1 bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-800/60 rounded-full text-[11px] transition">
+          🎸 Concerts in New York
+        </button>
+        <button onclick="sendQuickMessage('Check ticket availability and price')" class="shrink-0 px-3 py-1 bg-purple-950/60 hover:bg-purple-900/80 text-purple-300 border border-purple-800/60 rounded-full text-[11px] transition">
+          🎟️ Check Availability
+        </button>
+        <button onclick="sendQuickMessage('Show me comedy shows in Chicago')" class="shrink-0 px-3 py-1 bg-blue-950/60 hover:bg-blue-900/80 text-blue-300 border border-blue-800/60 rounded-full text-[11px] transition">
+          😂 Comedy in Chicago
+        </button>
+      </div>
+
+      <!-- Chat Input -->
+      <form id="chatForm" onsubmit="handleChatSubmit(event)" class="p-3 bg-gray-900/90 border-t border-gray-800 flex items-center space-x-2">
+        <input 
+          id="chatInput" 
+          type="text" 
+          placeholder="Ask e.g. 'Find rock concerts in NY' or 'Book 2 tickets'..." 
+          class="flex-1 bg-gray-950 border border-gray-700/80 rounded-xl px-4 py-2.5 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-indigo-500 transition"
+          required
+        />
+        <button 
+          id="sendBtn" 
+          type="submit" 
+          class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl text-xs font-medium transition flex items-center space-x-1.5 shadow-lg shadow-indigo-600/20"
+        >
+          <span>Send</span>
+          <i class="fas fa-paper-plane text-[10px]"></i>
+        </button>
+      </form>
+    </section>
+
+    <!-- Right Panel: Events, Availability & Digital Tickets (7 cols) -->
+    <section class="lg:col-span-7 flex flex-col space-y-6">
+
+      <!-- Navigation Tabs -->
+      <div class="flex items-center space-x-2 border-b border-gray-800 pb-3">
+        <button onclick="switchTab('events')" id="tab-events-btn" class="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition flex items-center space-x-2">
+          <i class="fas fa-calendar-alt"></i>
+          <span>1 & 2. Browse Events</span>
+        </button>
+        <button onclick="switchTab('booking')" id="tab-booking-btn" class="px-4 py-2 rounded-xl text-xs font-medium bg-gray-900 text-gray-400 hover:text-gray-200 transition flex items-center space-x-2">
+          <i class="fas fa-ticket-alt"></i>
+          <span>3, 4 & 5. Availability & Booking</span>
+        </button>
+        <button onclick="switchTab('tickets')" id="tab-tickets-btn" class="px-4 py-2 rounded-xl text-xs font-medium bg-gray-900 text-gray-400 hover:text-gray-200 transition flex items-center space-x-2">
+          <i class="fas fa-qrcode"></i>
+          <span>6 & 7. Digital Ticket & QR</span>
+        </button>
+      </div>
+
+      <!-- Tab Content 1: Events Explorer -->
+      <div id="tab-events" class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-semibold text-gray-300">Live Seeded Events</h3>
+          <button onclick="fetchEvents()" class="text-xs text-indigo-400 hover:text-indigo-300 flex items-center space-x-1">
+            <i class="fas fa-sync-alt text-[10px]"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        <div id="eventsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="col-span-2 text-center py-12 text-gray-500 text-xs">
+            <i class="fas fa-circle-notch fa-spin text-lg mb-2"></i>
+            <div>Loading live events...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Availability & Booking Modal -->
+      <div id="tab-booking" class="hidden space-y-4">
+        <div class="glass p-5 rounded-2xl border border-gray-800">
+          <div class="flex items-start justify-between border-b border-gray-800 pb-4 mb-4">
+            <div>
+              <span id="bookingEventCategory" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-950 text-indigo-400 border border-indigo-800">Concert</span>
+              <h3 id="bookingEventTitle" class="text-base font-bold text-gray-100 mt-1.5">Select an Event First</h3>
+              <p id="bookingEventVenue" class="text-xs text-gray-400 mt-0.5">Venue details will appear here</p>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-gray-500 block uppercase tracking-wider">Remaining Capacity</span>
+              <span id="bookingTotalAvail" class="text-lg font-bold text-emerald-400">--</span>
+            </div>
+          </div>
+
+          <!-- Ticket Tiers List -->
+          <div class="space-y-3 mb-5">
+            <h4 class="text-xs font-semibold text-gray-300">Available Ticket Tiers (Stage 3 & 4)</h4>
+            <div id="tiersList" class="space-y-2">
+              <div class="text-xs text-gray-500 py-3 text-center">No event selected. Please select an event from Browse Events.</div>
+            </div>
+          </div>
+
+          <!-- Reservation Form -->
+          <form id="reserveForm" onsubmit="handleReserveSubmit(event)" class="space-y-4 border-t border-gray-800 pt-4">
+            <h4 class="text-xs font-semibold text-gray-300 flex items-center space-x-2">
+              <span>Customer Details (Stage 5 Reservation)</span>
+              <span class="text-[10px] text-purple-400 font-normal">🛡️ Redis Distributed Lock Protected</span>
+            </h4>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] text-gray-400 mb-1">Customer Full Name</label>
+                <input id="custName" type="text" value="Alice Johnson" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-indigo-500" />
+              </div>
+              <div>
+                <label class="block text-[11px] text-gray-400 mb-1">Email Address</label>
+                <input id="custEmail" type="email" value="alice@example.com" required class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-indigo-500" />
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+              <div>
+                <span class="text-[11px] text-gray-400">Total Price: </span>
+                <span id="bookingTotalPrice" class="text-sm font-bold text-gray-100">₹0.00</span>
+              </div>
+              <button 
+                id="reserveBtn" 
+                type="submit" 
+                class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-medium rounded-xl text-xs transition shadow-lg shadow-emerald-600/20 flex items-center space-x-2"
+              >
+                <i class="fas fa-lock text-[10px]"></i>
+                <span>Reserve Tickets (Stage 5)</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Tab Content 3: Digital Ticket & QR Verification -->
+      <div id="tab-tickets" class="hidden space-y-4">
+        <div id="noTicketNotice" class="glass p-12 rounded-2xl border border-gray-800 text-center">
+          <i class="fas fa-ticket-alt text-4xl text-gray-600 mb-3 block"></i>
+          <h4 class="text-sm font-semibold text-gray-300">No Active Confirmed Booking Yet</h4>
+          <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto">Complete a reservation or ask the AI assistant to book tickets to view and verify your signed digital tickets with QR credentials.</p>
+        </div>
+
+        <div id="ticketContainer" class="hidden glass p-6 rounded-2xl border border-gray-800 space-y-5">
+          <!-- Ticket Header -->
+          <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+            <div>
+              <span class="text-[10px] text-emerald-400 font-semibold tracking-wider uppercase bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
+                Stage 6: Confirmed Booking
+              </span>
+              <h3 id="ticketEventTitle" class="text-lg font-bold text-gray-100 mt-1.5">Coldplay: Music of the Spheres</h3>
+              <p id="ticketVenue" class="text-xs text-gray-400">Madison Square Garden, New York</p>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-gray-500 block uppercase">Booking Reference</span>
+              <span id="ticketRef" class="text-sm font-mono font-bold text-indigo-400">BK-XXXXXX</span>
+            </div>
+          </div>
+
+          <!-- Ticket Content -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div class="space-y-3 text-xs">
+              <div>
+                <span class="text-gray-500 block text-[11px]">Primary Customer</span>
+                <span id="ticketCustomer" class="font-medium text-gray-200">Alice Johnson</span>
+              </div>
+              <div>
+                <span class="text-gray-500 block text-[11px]">Ticket Category & Quantity</span>
+                <span id="ticketTierName" class="font-medium text-gray-200">VIP Floor Access (2 Seats)</span>
+              </div>
+              <div>
+                <span class="text-gray-500 block text-[11px]">Seat Allocation</span>
+                <span id="ticketSeats" class="font-medium text-indigo-300">Sec VIP-01, Sec VIP-02</span>
+              </div>
+              <div>
+                <span class="text-gray-500 block text-[11px]">Status</span>
+                <span id="ticketStatus" class="font-semibold text-emerald-400">CONFIRMED (Valid for Gate Entry)</span>
+              </div>
+            </div>
+
+            <!-- QR Code Card -->
+            <div class="bg-gray-900 border border-gray-700/80 p-4 rounded-xl flex flex-col items-center justify-center text-center">
+              <div class="w-40 h-40 bg-white p-2 rounded-lg shadow-lg flex items-center justify-center">
+                <img id="ticketQrImg" src="" alt="Gate QR Code" class="w-full h-full object-contain" />
+              </div>
+              <span id="ticketCodeLabel" class="text-[11px] font-mono text-gray-400 mt-2">TIX-XXXXXXXX</span>
+              <span class="text-[10px] text-gray-500">Cryptographically Signed Gate Credential</span>
+            </div>
+          </div>
+
+          <!-- Post-booking Actions (Stage 7) -->
+          <div class="border-t border-gray-800 pt-4 flex items-center justify-between">
+            <button onclick="verifyTicketGate()" class="px-3.5 py-2 bg-indigo-900/60 hover:bg-indigo-800/80 text-indigo-200 border border-indigo-700 text-xs rounded-xl font-medium transition flex items-center space-x-1.5">
+              <i class="fas fa-scanner"></i>
+              <span>Simulate Gate Scanner (Stage 7)</span>
+            </button>
+            <button onclick="cancelCurrentBooking()" class="px-3.5 py-2 bg-rose-950/60 hover:bg-rose-900/80 text-rose-300 border border-rose-800 text-xs rounded-xl font-medium transition flex items-center space-x-1.5">
+              <i class="fas fa-ban"></i>
+              <span>Cancel Booking & Release Seats</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script>
+    let currentSessionId = "user_session_" + Math.random().toString(36).substring(2, 9);
+    let selectedEvent = null;
+    let selectedTier = null;
+    let currentBooking = null;
+
+    // Set Active Lifecycle Stage Badge
+    function setLifecycleStage(stageName) {
+      document.querySelectorAll('.stage-pill').forEach(el => el.classList.remove('active'));
+      const activeEl = document.getElementById('stage-' + stageName);
+      if (activeEl) activeEl.classList.add('active');
+    }
+
+    // Switch Right Panel Tabs
+    function switchTab(tab) {
+      ['events', 'booking', 'tickets'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`tab-${t}-btn`);
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('bg-gray-900', 'text-gray-400');
+      });
+
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-${tab}-btn`);
+      activeBtn.classList.remove('bg-gray-900', 'text-gray-400');
+      activeBtn.classList.add('bg-indigo-600', 'text-white');
+    }
+
+    // Append Chat Message
+    function appendMessage(sender, text, stage, suggestedActions) {
+      const history = document.getElementById('chatHistory');
+      const isUser = sender === 'user';
+      const wrapper = document.createElement('div');
+      wrapper.className = `flex items-start space-x-3 ${isUser ? 'justify-end' : ''}`;
+
+      let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      formattedText = formattedText.replace(/\n/g, '<br/>');
+
+      if (isUser) {
+        wrapper.innerHTML = `
+          <div class="bg-indigo-600 text-white rounded-2xl rounded-tr-sm px-4 py-2.5 text-xs max-w-[85%] shadow-md">
+            ${formattedText}
+          </div>
+        `;
+      } else {
+        let actionsHtml = '';
+        if (suggestedActions && suggestedActions.length > 0) {
+          actionsHtml = '<div class="mt-3 flex flex-wrap gap-1.5">';
+          suggestedActions.forEach(act => {
+            actionsHtml += `
+              <button onclick="handleSuggestedAction('${act.action_type}', '${escape(JSON.stringify(act.payload || {}))}')" class="px-2.5 py-1 bg-indigo-900/60 hover:bg-indigo-800/80 border border-indigo-700/60 text-indigo-200 rounded-lg text-[10px] transition">
+                ⚡ ${act.label}
+              </button>
+            `;
+          });
+          actionsHtml += '</div>';
+        }
+
+        wrapper.innerHTML = `
+          <div class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center shrink-0 text-xs">
+            🤖
+          </div>
+          <div class="bg-gray-800/90 border border-gray-700/60 rounded-2xl rounded-tl-sm px-4 py-3 text-xs leading-relaxed max-w-[85%] text-gray-200 shadow-sm">
+            <div>${formattedText}</div>
+            ${actionsHtml}
+          </div>
+        `;
+      }
+
+      history.appendChild(wrapper);
+      history.scrollTop = history.scrollHeight;
+
+      if (stage) setLifecycleStage(stage);
+    }
+
+    // Submit Chat
+    async function handleChatSubmit(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('chatInput');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      input.value = '';
+      appendMessage('user', msg);
+
+      // Loading bubble
+      const history = document.getElementById('chatHistory');
+      const loader = document.createElement('div');
+      loader.id = 'chatLoader';
+      loader.className = 'flex items-center space-x-2 text-xs text-gray-500 py-1 pl-10';
+      loader.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i><span>Thinking...</span>';
+      history.appendChild(loader);
+      history.scrollTop = history.scrollHeight;
+
+      try {
+        const res = await fetch('/api/v1/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: msg, session_id: currentSessionId })
+        });
+        const data = await res.json();
+        loader.remove();
+
+        appendMessage('assistant', data.message, data.current_stage, data.suggested_actions);
+
+        // If context has selected event, sync with booking panel
+        if (data.context_data && data.context_data.selected_event_id) {
+          selectEvent(data.context_data.selected_event_id);
+        }
+      } catch (err) {
+        loader.remove();
+        appendMessage('assistant', "❌ Error connecting to server: " + err.message);
+      }
+    }
+
+    function sendQuickMessage(txt) {
+      document.getElementById('chatInput').value = txt;
+      handleChatSubmit();
+    }
+
+    function handleSuggestedAction(actionType, escapedPayload) {
+      try {
+        const payload = JSON.parse(unescape(escapedPayload));
+        if (actionType === 'check_availability' && payload.event_id) {
+          selectEvent(payload.event_id);
+          sendQuickMessage("Check availability for selected event");
+        } else if (actionType === 'select_tier') {
+          sendQuickMessage(`Book tickets for tier ${payload.tier_id}`);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function resetChat() {
+      currentSessionId = "user_session_" + Math.random().toString(36).substring(2, 9);
+      document.getElementById('chatHistory').innerHTML = `
+        <div class="flex items-start space-x-3">
+          <div class="w-7 h-7 rounded-lg bg-indigo-600/30 text-indigo-400 flex items-center justify-center shrink-0 text-xs">🤖</div>
+          <div class="bg-gray-800/90 border border-gray-700/60 rounded-2xl rounded-tl-sm px-4 py-3 text-xs leading-relaxed max-w-[85%] text-gray-200">
+            Session restarted! How can I assist you with events and tickets today?
+          </div>
+        </div>
+      `;
+      setLifecycleStage('Discovery');
+    }
+
+    // Fetch Events List
+    async function fetchEvents() {
+      const container = document.getElementById('eventsList');
+      try {
+        const res = await fetch('/api/v1/events');
+        const events = await res.json();
+        container.innerHTML = '';
+
+        events.forEach(evt => {
+          const card = document.createElement('div');
+          card.className = "bg-gray-900 border border-gray-800 hover:border-indigo-500/50 rounded-xl p-4 transition flex flex-col justify-between";
+          card.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-indigo-950 text-indigo-400 border border-indigo-800">${evt.category}</span>
+                <span class="text-[11px] text-gray-500"><i class="far fa-clock mr-1"></i>${new Date(evt.start_time).toLocaleDateString()}</span>
+              </div>
+              <h4 class="text-sm font-bold text-gray-100">${evt.title}</h4>
+              <p class="text-xs text-gray-400 mt-1 line-clamp-2">${evt.description || 'Live concert and entertainment performance.'}</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-800 flex items-center justify-between">
+              <span class="text-xs text-emerald-400 font-semibold">Active Inventory</span>
+              <button onclick="selectEvent('${evt.id}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition flex items-center space-x-1">
+                <span>View Seats</span>
+                <i class="fas fa-chevron-right text-[10px]"></i>
+              </button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        container.innerHTML = `<div class="col-span-2 text-rose-400 text-xs text-center py-6">Failed to load events: ${err.message}</div>`;
+      }
+    }
+
+    // Select Event & Fetch Availability
+    async function selectEvent(eventId) {
+      switchTab('booking');
+      setLifecycleStage('Availability');
+      const tiersContainer = document.getElementById('tiersList');
+      tiersContainer.innerHTML = '<div class="text-xs text-gray-500 py-3 text-center"><i class="fas fa-circle-notch fa-spin mr-1"></i> Checking seat inventory...</div>';
+
+      try {
+        const res = await fetch(`/api/v1/events/${eventId}/availability`);
+        const data = await res.json();
+        selectedEvent = data;
+
+        document.getElementById('bookingEventTitle').innerText = data.event_title;
+        document.getElementById('bookingEventVenue').innerText = `${data.venue_name} • ${data.city}`;
+        document.getElementById('bookingTotalAvail').innerText = `${data.total_available_tickets} seats`;
+
+        tiersContainer.innerHTML = '';
+        data.tiers.forEach((tier, idx) => {
+          const isSoldOut = tier.available_quantity <= 0;
+          const tierDiv = document.createElement('div');
+          tierDiv.className = `p-3 rounded-xl border flex items-center justify-between transition cursor-pointer ${
+            idx === 0 && !isSoldOut ? 'border-indigo-500 bg-indigo-950/20' : 'border-gray-800 bg-gray-900/60'
+          } ${isSoldOut ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-700'}`;
+
+          tierDiv.innerHTML = `
+            <div class="flex items-center space-x-3">
+              <input type="radio" name="selectedTier" value="${tier.id}" ${idx === 0 && !isSoldOut ? 'checked' : ''} ${isSoldOut ? 'disabled' : ''} onchange="onTierSelect('${tier.id}', ${tier.price})" class="text-indigo-600 focus:ring-indigo-500" />
+              <div>
+                <span class="text-xs font-semibold text-gray-200 block">${tier.name}</span>
+                <span class="text-[11px] text-gray-400">${tier.available_quantity} remaining of ${tier.total_quantity}</span>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-sm font-bold text-gray-100">₹${tier.price.toLocaleString('en-IN')}</span>
+              <span class="block text-[10px] ${isSoldOut ? 'text-rose-400 font-semibold' : 'text-emerald-400'}">${isSoldOut ? 'SOLD OUT' : 'Available'}</span>
+            </div>
+          `;
+          tiersContainer.appendChild(tierDiv);
+          if (idx === 0 && !isSoldOut) onTierSelect(tier.id, tier.price);
+        });
+      } catch (err) {
+        tiersContainer.innerHTML = `<div class="text-rose-400 text-xs">Error: ${err.message}</div>`;
+      }
+    }
+
+    function onTierSelect(tierId, price) {
+      selectedTier = { id: tierId, price: price };
+      document.getElementById('bookingTotalPrice').innerText = `₹${price.toLocaleString('en-IN')}`;
+      setLifecycleStage('Selection');
+    }
+
+    // Submit Reservation (Stage 5) & Immediate Confirmation (Stage 6)
+    async function handleReserveSubmit(e) {
+      e.preventDefault();
+      if (!selectedEvent || !selectedTier) {
+        alert("Please select an event and ticket tier.");
+        return;
+      }
+
+      const reserveBtn = document.getElementById('reserveBtn');
+      reserveBtn.disabled = true;
+      reserveBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> Securing Lock...';
+
+      const payload = {
+        event_id: selectedEvent.event_id,
+        tier_id: selectedTier.id,
+        quantity: 1,
+        customer_name: document.getElementById('custName').value,
+        customer_email: document.getElementById('custEmail').value
+      };
+
+      try {
+        // Stage 5: Reserve
+        setLifecycleStage('Booking');
+        const res = await fetch('/api/v1/bookings/reserve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Failed to reserve ticket');
+        }
+
+        const booking = await res.json();
+
+        // Stage 6: Confirm
+        setLifecycleStage('Confirmation');
+        const confirmRes = await fetch('/api/v1/bookings/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ booking_reference: booking.booking_reference, payment_reference: "PAY-WEB-DEMO" })
+        });
+        const confirmedData = await confirmRes.json();
+
+        currentBooking = confirmedData;
+        showConfirmedTicket(confirmedData);
+        switchTab('tickets');
+      } catch (err) {
+        alert("Booking Error: " + err.message);
+      } finally {
+        reserveBtn.disabled = false;
+        reserveBtn.innerHTML = '<i class="fas fa-lock text-[10px] mr-1"></i><span>Reserve Tickets (Stage 5)</span>';
+      }
+    }
+
+    // Render Confirmed Digital Ticket
+    async function showConfirmedTicket(booking) {
+      document.getElementById('noTicketNotice').classList.add('hidden');
+      document.getElementById('ticketContainer').classList.remove('hidden');
+
+      document.getElementById('ticketRef').innerText = booking.booking_reference;
+      document.getElementById('ticketEventTitle').innerText = booking.event_title || 'Live Event';
+      document.getElementById('ticketCustomer').innerText = booking.customer ? booking.customer.full_name : 'Customer';
+      document.getElementById('ticketTierName').innerText = `${booking.tier_name} (${booking.quantity} ticket)`;
+
+      if (booking.tickets && booking.tickets.length > 0) {
+        const ticket = booking.tickets[0];
+        document.getElementById('ticketCodeLabel').innerText = ticket.ticket_code;
+        document.getElementById('ticketSeats').innerText = booking.tickets.map(t => t.seat_number).join(', ');
+
+        // Fetch QR image
+        const qrRes = await fetch(`/api/v1/tickets/${ticket.ticket_code}/qr`);
+        const qrData = await qrRes.json();
+        document.getElementById('ticketQrImg').src = qrData.qr_base64;
+      }
+    }
+
+    // Stage 7: Gate Scanner Verification
+    async function verifyTicketGate() {
+      if (!currentBooking || !currentBooking.tickets || currentBooking.tickets.length === 0) return;
+      const ticket = currentBooking.tickets[0];
+
+      try {
+        const res = await fetch('/api/v1/tickets/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ qr_payload: ticket.qr_payload })
+        });
+        const result = await res.json();
+
+        if (result.is_valid) {
+          alert(`✅ Gate Entry Granted!\nEvent: ${result.event_id}\nSeat: ${result.seat_number}\nSignature: Verified`);
+        } else {
+          alert(`❌ Access Denied: ${result.reason}`);
+        }
+      } catch (err) {
+        alert("Scan Error: " + err.message);
+      }
+    }
+
+    // Stage 7: Cancel Booking & Release Inventory
+    async function cancelCurrentBooking() {
+      if (!currentBooking) return;
+      if (!confirm(`Cancel booking ${currentBooking.booking_reference} and release seats back to inventory?`)) return;
+
+      try {
+        const res = await fetch('/api/v1/bookings/cancel', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ booking_reference: currentBooking.booking_reference, reason: "Cancelled from Web UI" })
+        });
+        const cancelled = await res.json();
+        alert(`Booking ${cancelled.booking_reference} has been CANCELLED and tickets released back to inventory.`);
+
+        document.getElementById('ticketStatus').innerText = "CANCELLED (Seats Released)";
+        document.getElementById('ticketStatus').className = "font-semibold text-rose-400";
+        setLifecycleStage('Post-booking');
+      } catch (err) {
+        alert("Cancellation Error: " + err.message);
+      }
+    }
+
+    // Initial load
+    fetchEvents();
+  </script>
+</body>
+</html>
+

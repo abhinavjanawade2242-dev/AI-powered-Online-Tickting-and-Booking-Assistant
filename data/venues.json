@@ -1,0 +1,57 @@
+[
+  {
+    "id": "venue-campus-audi",
+    "name": "APJ Abdul Kalam Central Auditorium",
+    "category": "Campus Auditorium",
+    "city": "Bengaluru",
+    "address": "Campus Main Block, Ground Floor, RV Vidyaniketan, Bengaluru, Karnataka 560059",
+    "capacity": 1200,
+    "amenities": "Dual 4K Laser Projection, Acoustic Paneling, Centralized AC, Green Rooms, Wheelchair Accessible",
+    "description": "State-of-the-art campus auditorium equipped with acoustic sound treatment, dual 4K laser projectors, and centralized air conditioning.",
+    "active": true
+  },
+  {
+    "id": "venue-tech-hub",
+    "name": "Turing Innovation & Incubation Center",
+    "category": "Technology Lab & Hackathon Arena",
+    "city": "Bengaluru",
+    "address": "Block 3, Innovation Corridor, Tech Campus, Bengaluru, Karnataka 560059",
+    "capacity": 350,
+    "amenities": "1Gbps Dedicated LAN, Ergonomic Desking, 3D Printers, Cloud Sandbox Terminals, 24/7 Cafeteria",
+    "description": "High-density technical lab arena featuring high-speed 1Gbps gigabit LAN, ergonomic hot-desking, maker equipment, and presentation stages.",
+    "active": true
+  },
+  {
+    "id": "venue-open-amphi",
+    "name": "Kuvempu Open Air Amphitheatre",
+    "category": "Open Air Amphitheatre",
+    "city": "Bengaluru",
+    "address": "Cultural Quadrangle, Near Lake Gate, Campus Grounds, Bengaluru, Karnataka 560059",
+    "capacity": 2000,
+    "amenities": "Stage Lighting Truss, 10kW Line Array Sound, Stepped Tier Seating, Festival Food Court",
+    "description": "Open-air stepped amphitheatre for rock concerts, street plays, battle of bands, and university cultural festivals under the stars.",
+    "active": true
+  },
+  {
+    "id": "venue-sports-arena",
+    "name": "Netaji Subhas Indoor Sports Complex",
+    "category": "Sports & Esports Arena",
+    "city": "Bengaluru",
+    "address": "Physical Education Wing, North Campus, Bengaluru, Karnataka 560059",
+    "capacity": 800,
+    "amenities": "Maple Hardwood Court, Ultra-low-latency Fiber LAN, Spectator Gallery, Team Dugouts",
+    "description": "Multipurpose indoor sports arena featuring wooden maple courts, spectator stands, broadcast cameras, and low-latency LAN for esports.",
+    "active": true
+  },
+  {
+    "id": "venue-city-centre",
+    "name": "Sir M. Visvesvaraya Memorial Cultural Center",
+    "category": "Civic Cultural Center",
+    "city": "Bengaluru",
+    "address": "Kasturba Road, Opp. Cubbon Park, Bengaluru, Karnataka 560001",
+    "capacity": 600,
+    "amenities": "Proscenium Arch Stage, Green Rooms, Heritage Architecture, Public Transit Access, Parking Plaza",
+    "description": "Heritage municipal cultural auditorium hosting classic Kannada theatre, musical recitals, literary symposiums, and civic youth showcases.",
+    "active": true
+  }
+]

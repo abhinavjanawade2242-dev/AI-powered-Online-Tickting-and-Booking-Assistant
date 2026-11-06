@@ -1,0 +1,112 @@
+[
+  {
+    "id": "event-technovate-hack",
+    "venue_id": "venue-tech-hub",
+    "title": "Technovate 2026: 36-Hour National Hackathon",
+    "description": "Build innovative solutions in AI, Climate Tech, and FinTech. 36 hours of non-stop coding, mentoring, free food, and exciting cash prizes up to \u20b92,50,000.",
+    "category": "Technical",
+    "start_time": "2026-11-20T09:00:00+05:30",
+    "end_time": "2026-11-21T21:00:00+05:30",
+    "status": "ACTIVE",
+    "image_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d"
+  },
+  {
+    "id": "event-dhwani-fest",
+    "venue_id": "venue-open-amphi",
+    "title": "Dhwani '26: Annual Inter-College Cultural Fest & Battle of Bands",
+    "description": "The largest student cultural fest featuring electrifying battle of bands, classical fusion dances, street plays, food stalls, and a celebrity DJ night.",
+    "category": "Cultural",
+    "start_time": "2026-11-25T16:00:00+05:30",
+    "end_time": "2026-11-25T23:00:00+05:30",
+    "status": "ACTIVE",
+    "image_url": "https://images.unsplash.com/photo-1470225620780-dba8ba36b745"
+  },
+  {
+    "id": "event-ai-robotics-summit",
+    "venue_id": "venue-campus-audi",
+    "title": "National Student AI & Robotics Summit 2026",
+    "description": "Keynotes from Google DeepMind and IISc researchers, autonomous drone obstacle demos, humanoid robot showcases, and interactive LLM agent workshops.",
+    "category": "Technical",
+    "start_time": "2026-12-02T10:00:00+05:30",
+    "end_time": "2026-12-02T17:30:00+05:30",
+    "status": "ACTIVE",
+    "image_url": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e"
+  },
+  {
+    "id": "event-esports-championship",
+    "venue_id": "venue-sports-arena",
+    "title": "Campus Valorant & BGMI Esports Championship Finals",
+    "description": "Cheer for the top collegiate esports rosters clashing on stage with live casting, LED main screens, gaming gear giveaways, and cosplay contests.",
+    "category": "Sports",
+    "start_time": "2026-12-05T14:00:00+05:30",
+    "end_time": "2026-12-05T21:00:00+05:30",
+    "status": "ACTIVE",
+    "image_url": "https://images.unsplash.com/photo-1542751371-adc38448a05e"
+  },
+  {
+    "id": "event-kannada-theatre",
+    "venue_id": "venue-city-centre",
+    "title": "'Tughlaq' Classic Kannada Drama by Campus Guild",
+    "description": "Girish Karnad's historic masterpiece staged by the award-winning student repertory company with live Carnatic percussion and traditional costume design.",
+    "category": "Cultural",
+    "start_time": "2026-12-10T18:30:00+05:30",
+    "end_time": "2026-12-10T21:30:00+05:30",
+    "status": "ACTIVE",
+    "image_url": "https://images.unsplash.com/photo-1507676184212-d03ab07a01bf"
+  },
+  {
+    "id": "event-startup-pitch-fest",
+    "venue_id": "venue-tech-hub",
+    "title": "VentureNest Student Startup Pitch & Angel Demo Day",
+    "description": "Watch 15 shortlisted student founders pitch ventures to seed venture capitalists, angel investors, and tech leaders. Includes networking high tea.",
+    "category": "Technical",
+    "start_time": "2026-12-12T14:00:00+05:30",
+    "end_time": "2026-12-12T19:00:00+05:30",
+    "status": "ACTIVE",
+    "image_url": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2"
+  },
+  {
+    "id": "event-classical-fusion",
+    "venue_id": "venue-campus-audi",
+    "title": "Raag & Rhythm: Indo-Western Classical Fusion Night",
+    "description": "A spellbinding evening of sitar, violin, drums, and saxophone featuring student prodigies performing original ragas adapted to modern jazz.",
+    "category": "Cultural",
+    "start_time": "2026-12-15T18:00:00+05:30",
+    "end_time": "2026-12-15T21:00:00+05:30",
+    "status": "ACTIVE",
+    "image_url": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4"
+  },
+  {
+    "id": "event-cybersec-bootcamp",
+    "venue_id": "venue-tech-hub",
+    "title": "Hands-on Ethical Hacking & Cyber Defense Bootcamp",
+    "description": "Intensive hands-on masterclass covering web application vulnerabilities, CTF challenges, network packet inspection, and bug bounty methodologies.",
+    "category": "Workshop",
+    "start_time": "2026-12-18T09:30:00+05:30",
+    "end_time": "2026-12-18T17:00:00+05:30",
+    "status": "ACTIVE",
+    "image_url": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5"
+  },
+  {
+    "id": "event-tedx-campus",
+    "venue_id": "venue-campus-audi",
+    "title": "TEDx Youth: Innovating for Tomorrow's Bharat",
+    "description": "Independent TED conference bringing 8 visionary voices spanning grassroots education, aerospace engineering, local arts, and ethical artificial intelligence.",
+    "category": "Conference",
+    "start_time": "2026-12-22T10:00:00+05:30",
+    "end_time": "2026-12-22T16:30:00+05:30",
+    "status": "ACTIVE",
+    "image_url": "https://images.unsplash.com/photo-1544531585-9847b68c8c86"
+  },
+  {
+    "id": "event-draft-robot-wars",
+    "venue_id": "venue-sports-arena",
+    "title": "RoboClash: Inter-University Combat Robotics League",
+    "description": "Armored remote-controlled bots battle in an enclosed steel arena. Flame throwers, spinning saws, and high-impact flippers.",
+    "category": "Technical",
+    "start_time": "2027-01-10T11:00:00+05:30",
+    "end_time": "2027-01-10T18:00:00+05:30",
+    "status": "INACTIVE",
+    "image_url": "https://images.unsplash.com/photo-1517048676732-d65bc937f952"
+  }
+]
