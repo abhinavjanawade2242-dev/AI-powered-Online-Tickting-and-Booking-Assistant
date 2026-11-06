@@ -86,3 +86,4 @@ async def list_active_promos() -> List[Dict[str, Any]]:
         {"code": code, **meta}
         for code, meta in PricingService.SUPPORTED_PROMOS.items()
     ]
+
