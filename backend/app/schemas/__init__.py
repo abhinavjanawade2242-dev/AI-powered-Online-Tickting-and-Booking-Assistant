@@ -231,13 +231,17 @@ class BookingReservationRequest(BaseModel):
     Step 4/5: Customer selects ticket type and quantity.
     Acquires distributed lock and reserves tickets with a temporary hold.
     """
-    event_id: str = Field(..., description="Target event ID")
+    event_id: Optional[str] = Field(None, description="Target event ID (optional if tier_id is provided)")
     tier_id: str = Field(..., description="Ticket tier / category ID")
     quantity: int = Field(..., ge=1, le=10, description="Number of tickets requested")
     customer_name: str = Field(..., example="John Smith")
     customer_email: EmailStr = Field(..., example="john.smith@example.com")
     customer_phone: Optional[str] = Field(None, example="+1-555-1234")
     promo_code: Optional[str] = Field(None, description="Optional coupon or promo code (e.g., TECH20, STUDENT10)", example="TECH20")
+
+
+class BookingCancelPathRequest(BaseModel):
+    reason: Optional[str] = Field("Customer requested cancellation", example="Schedule conflict")
 
 
 class BookingConfirmRequest(BaseModel):

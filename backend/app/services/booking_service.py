@@ -74,8 +74,9 @@ class BookingService:
             # 2. Acquire Relational Row-Level Lock (FOR UPDATE)
             tier = await acquire_ticket_tier_for_update(db, req.tier_id)
 
-            if tier.event_id != req.event_id:
+            if req.event_id and tier.event_id != req.event_id:
                 raise ValueError("Tier ID does not belong to the specified event ID.")
+            effective_event_id = req.event_id or tier.event_id
 
             # Validate currency constraint
             BusinessRulesEngine.validate_currency(tier.currency)
@@ -117,7 +118,7 @@ class BookingService:
             booking = Booking(
                 booking_reference=booking_ref,
                 user_id=user.id,
-                event_id=req.event_id,
+                event_id=effective_event_id,
                 tier_id=req.tier_id,
                 quantity=req.quantity,
                 unit_price=tier.price,

@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -12,6 +13,7 @@ from app.schemas import (
     BookingReservationRequest,
     BookingConfirmRequest,
     BookingCancelRequest,
+    BookingCancelPathRequest,
     BookingResponse,
     DigitalTicketResponse,
     CustomerResponse,
@@ -93,6 +95,18 @@ async def reserve_tickets(
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post("/lock", response_model=BookingResponse, status_code=status.HTTP_201_CREATED, summary="Stage 4 & 5: Lock / Hold Inventory Alias")
+async def lock_inventory_alias(
+    req: BookingReservationRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Stage 4 & 5: Selection & Booking.
+    Alias endpoint for /reserve supporting quick inventory hold/locking.
+    """
+    return await reserve_tickets(req=req, db=db)
 
 
 @router.post("/confirm", response_model=BookingResponse, summary="Stage 6: Confirm Booking & Generate Digital Tickets")
@@ -248,6 +262,28 @@ async def cancel_booking(
             db=db,
             booking_reference=req.booking_reference,
             reason=req.reason
+        )
+        return _serialize_booking(booking)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.post("/{booking_reference}/cancel", response_model=BookingResponse, summary="Stage 7: Cancel Booking via URL Path Alias")
+async def cancel_booking_path_alias(
+    booking_reference: str,
+    req: Optional[BookingCancelPathRequest] = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Stage 7: Post-booking Cancellation.
+    Alias endpoint allowing booking_reference in URL path.
+    """
+    reason = req.reason if req and req.reason else "Customer requested cancellation"
+    try:
+        booking = await BookingService.cancel_booking(
+            db=db,
+            booking_reference=booking_reference.strip().upper(),
+            reason=reason
         )
         return _serialize_booking(booking)
     except ValueError as e:

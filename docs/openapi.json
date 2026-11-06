@@ -856,6 +856,48 @@
         }
       }
     },
+    "/api/v1/bookings/lock": {
+      "post": {
+        "tags": [
+          "Stage 4, 5, 6 & 7: Booking & Lifecycle"
+        ],
+        "summary": "Stage 4 & 5: Lock / Hold Inventory Alias",
+        "description": "Stage 4 & 5: Selection & Booking.\nAlias endpoint for /reserve supporting quick inventory hold/locking.",
+        "operationId": "lock_inventory_alias_api_v1_bookings_lock_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingReservationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/bookings/confirm": {
       "post": {
         "tags": [
@@ -1042,6 +1084,66 @@
             }
           },
           "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bookings/{booking_reference}/cancel": {
+      "post": {
+        "tags": [
+          "Stage 4, 5, 6 & 7: Booking & Lifecycle"
+        ],
+        "summary": "Stage 7: Cancel Booking via URL Path Alias",
+        "description": "Stage 7: Post-booking Cancellation.\nAlias endpoint allowing booking_reference in URL path.",
+        "operationId": "cancel_booking_path_alias_api_v1_bookings__booking_reference__cancel_post",
+        "parameters": [
+          {
+            "name": "booking_reference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Booking Reference"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/BookingCancelPathRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Req"
+              }
+            }
+          }
         },
         "responses": {
           "200": {
@@ -1691,6 +1793,25 @@
   },
   "components": {
     "schemas": {
+      "BookingCancelPathRequest": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason",
+            "default": "Customer requested cancellation",
+            "example": "Schedule conflict"
+          }
+        },
+        "type": "object",
+        "title": "BookingCancelPathRequest"
+      },
       "BookingCancelRequest": {
         "properties": {
           "booking_reference": {
@@ -1749,9 +1870,16 @@
       "BookingReservationRequest": {
         "properties": {
           "event_id": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Event Id",
-            "description": "Target event ID"
+            "description": "Target event ID (optional if tier_id is provided)"
           },
           "tier_id": {
             "type": "string",
@@ -1804,7 +1932,6 @@
         },
         "type": "object",
         "required": [
-          "event_id",
           "tier_id",
           "quantity",
           "customer_name",

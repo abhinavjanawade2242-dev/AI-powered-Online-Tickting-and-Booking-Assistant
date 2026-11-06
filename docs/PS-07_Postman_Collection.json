@@ -1,19 +1,24 @@
 {
   "info": {
-    "_postman_id": "ps07-ticketing-booking-assistant-v1",
+    "_postman_id": "ps07-ticketing-booking-assistant-v2",
     "name": "PS-07: AI-Powered Online Ticketing & Booking Assistant",
-    "description": "Comprehensive API collection for PS-07 QA testing, integration verification, and demo execution.",
+    "description": "Comprehensive Postman Collection for PS-07 QA testing, Frontend API integration, and gate scanner verification.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "host",
-      "value": "http://localhost:8000",
+      "value": "http://127.0.0.1:8000",
       "type": "string"
     },
     {
       "key": "base_url",
-      "value": "http://localhost:8000/api/v1",
+      "value": "http://127.0.0.1:8000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
       "type": "string"
     },
     {
@@ -23,17 +28,17 @@
     },
     {
       "key": "ticket_code",
-      "value": "TIX-9A82B3C4",
+      "value": "TIX-SAMPLE",
       "type": "string"
     },
     {
-      "key": "lock_token",
-      "value": "LCK-SAMPLE-TOKEN",
+      "key": "qr_payload",
+      "value": "TIX-SAMPLE|BK-TECH01|event-technovate-hack|Early Bird|1730000000|abc123456789",
       "type": "string"
     },
     {
       "key": "session_id",
-      "value": "sess_test123",
+      "value": "postman_session_001",
       "type": "string"
     }
   ],
@@ -58,7 +63,7 @@
           }
         },
         {
-          "name": "System Root Metadata",
+          "name": "Root Metadata",
           "request": {
             "method": "GET",
             "header": [
@@ -81,7 +86,100 @@
       ]
     },
     {
-      "name": "2. Discovery & Catalogue (US-01 to US-04)",
+      "name": "2. Authentication & User Profile",
+      "item": [
+        {
+          "name": "Register New Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"Adithya Gowda\",\n  \"email\": \"adithya.test@example.com\",\n  \"password\": \"SecurePassword123!\",\n  \"phone\": \"+91-9876543210\",\n  \"preferred_language\": \"en\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login & Obtain JWT Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.access_token) {",
+                  "    pm.environment.set(\"auth_token\", jsonData.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"adithya.test@example.com\",\n  \"password\": \"SecurePassword123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Discovery & Catalogue (Stage 1 & 2)",
       "item": [
         {
           "name": "List All Venues",
@@ -124,7 +222,7 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{base_url}}/events?search=Technovate",
+              "raw": "{{base_url}}/events?query=Technovate",
               "host": [
                 "{{base_url}}"
               ],
@@ -133,7 +231,7 @@
               ],
               "query": [
                 {
-                  "key": "search",
+                  "key": "query",
                   "value": "Technovate"
                 }
               ]
@@ -141,7 +239,7 @@
           }
         },
         {
-          "name": "Filter Events by Category",
+          "name": "Filter Events by Category (Technical)",
           "request": {
             "method": "GET",
             "url": {
@@ -199,7 +297,7 @@
           }
         },
         {
-          "name": "Check Real-Time Availability & INR Pricing",
+          "name": "Check Real-Time Availability & INR Pricing (Stage 3)",
           "request": {
             "method": "GET",
             "url": {
@@ -218,10 +316,114 @@
       ]
     },
     {
-      "name": "3. Booking & Concurrency Lock (US-05 to US-08)",
+      "name": "4. Pricing Engine (Discounts & Promo Codes)",
       "item": [
         {
-          "name": "Hold / Lock Inventory (Redis Lock)",
+          "name": "Calculate Price Quote (4 Tickets + TECH20)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tier_id\": \"tier-tech-early\",\n  \"quantity\": 4,\n  \"promo_code\": \"TECH20\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pricing/quote",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pricing",
+                "quote"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Calculate Price Quote (Group Discount Only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tier_id\": \"tier-tech-early\",\n  \"quantity\": 4\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/pricing/quote",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pricing",
+                "quote"
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Active Promotional Codes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pricing/promos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pricing",
+                "promos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Ticket Tier Pricing Breakdown",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pricing/tiers/tier-tech-early",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pricing",
+                "tiers",
+                "tier-tech-early"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Booking & Hold Reservation (Stage 4 & 5)",
+      "item": [
+        {
+          "name": "Reserve Tickets with Anti-Overbooking Lock (/reserve)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.booking_reference) {",
+                  "    pm.environment.set(\"booking_ref\", jsonData.booking_reference);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -231,12 +433,38 @@
               },
               {
                 "key": "Idempotency-Key",
-                "value": "idemp-lock-001"
+                "value": "idemp-reserve-001"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tier_id\": \"tier-tech-early\",\n  \"quantity\": 2,\n  \"customer_id\": \"cust-001\",\n  \"customer_name\": \"Manohar QA\",\n  \"customer_email\": \"manohar.qa@example.com\"\n}"
+              "raw": "{\n  \"event_id\": \"event-technovate-hack\",\n  \"tier_id\": \"tier-tech-early\",\n  \"quantity\": 2,\n  \"customer_name\": \"Manohar QA\",\n  \"customer_email\": \"manohar.qa@example.com\",\n  \"promo_code\": \"TECH20\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings/reserve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "reserve"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Hold / Lock Inventory Alias (/lock)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tier_id\": \"tier-tech-early\",\n  \"quantity\": 1,\n  \"customer_name\": \"Adithya Gowda\",\n  \"customer_email\": \"adithya@example.com\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/bookings/lock",
@@ -251,37 +479,7 @@
           }
         },
         {
-          "name": "Confirm Booking from Active Lock",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Idempotency-Key",
-                "value": "idemp-bk-001"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"booking_ref\": \"{{booking_ref}}\",\n  \"payment_method\": \"SIMULATED_UPI\",\n  \"simulated_status\": \"SUCCESS\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/bookings/confirm",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "bookings",
-                "confirm"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Retrieve Booking Details",
+          "name": "Retrieve Booking Details (Stage 7)",
           "request": {
             "method": "GET",
             "url": {
@@ -295,14 +493,51 @@
               ]
             }
           }
+        },
+        {
+          "name": "Get Authenticated User Booking History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/bookings/my-bookings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "my-bookings"
+              ]
+            }
+          }
         }
       ]
     },
     {
-      "name": "4. Payment Sandbox (US-09 to US-13)",
+      "name": "6. Payment Sandbox Simulation (Stage 6)",
       "item": [
         {
-          "name": "Simulate Payment SUCCESS",
+          "name": "Simulate Payment SUCCESS (Issues Digital Tickets)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.tickets && jsonData.tickets.length > 0) {",
+                  "    pm.environment.set(\"ticket_code\", jsonData.tickets[0].ticket_code);",
+                  "    pm.environment.set(\"qr_payload\", jsonData.tickets[0].qr_payload);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -313,7 +548,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"simulated_outcome\": \"SUCCESS\"\n}"
+              "raw": "{\n  \"simulated_outcome\": \"SUCCESS\",\n  \"payment_method\": \"UPI\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/bookings/{{booking_ref}}/payment-simulation",
@@ -329,7 +564,7 @@
           }
         },
         {
-          "name": "Simulate Payment FAILURE",
+          "name": "Simulate Payment FAILURE (Preserves Hold)",
           "request": {
             "method": "POST",
             "header": [
@@ -340,7 +575,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"simulated_outcome\": \"FAILURE\"\n}"
+              "raw": "{\n  \"simulated_outcome\": \"FAILURE\",\n  \"payment_method\": \"CREDIT_CARD\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/bookings/{{booking_ref}}/payment-simulation",
@@ -356,7 +591,7 @@
           }
         },
         {
-          "name": "Simulate Payment PENDING",
+          "name": "Confirm Booking Endpoint (/confirm)",
           "request": {
             "method": "POST",
             "header": [
@@ -367,17 +602,16 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"simulated_outcome\": \"PENDING\"\n}"
+              "raw": "{\n  \"booking_reference\": \"{{booking_ref}}\",\n  \"payment_reference\": \"SIM-TXN-UPI\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/bookings/{{booking_ref}}/payment-simulation",
+              "raw": "{{base_url}}/bookings/confirm",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "bookings",
-                "{{booking_ref}}",
-                "payment-simulation"
+                "confirm"
               ]
             }
           }
@@ -385,10 +619,10 @@
       ]
     },
     {
-      "name": "5. Digital Tickets & Gate Verification (US-08)",
+      "name": "7. Digital Tickets & Gate Verification (Stage 6 & 7)",
       "item": [
         {
-          "name": "Get Ticket Info",
+          "name": "Get Digital Ticket Details",
           "request": {
             "method": "GET",
             "url": {
@@ -404,7 +638,7 @@
           }
         },
         {
-          "name": "Get Base64 QR Code Image",
+          "name": "Get Base64 PNG QR Code Image",
           "request": {
             "method": "GET",
             "url": {
@@ -432,7 +666,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"qr_payload\": \"TIX-SAMPLE|BK-REF|event-id|Early Bird|1730000000|abc123456789\"\n}"
+              "raw": "{\n  \"qr_payload\": \"{{qr_payload}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/tickets/verify",
@@ -449,10 +683,10 @@
       ]
     },
     {
-      "name": "6. Cancellation & Refunds (US-15 to US-16)",
+      "name": "8. Cancellation & Refunds (Stage 7)",
       "item": [
         {
-          "name": "Cancel Booking (Restores Inventory)",
+          "name": "Cancel Booking via Body (/cancel)",
           "request": {
             "method": "POST",
             "header": [
@@ -463,7 +697,33 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Student schedule change\"\n}"
+              "raw": "{\n  \"booking_reference\": \"{{booking_ref}}\",\n  \"reason\": \"Student schedule conflict\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/bookings/cancel",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "bookings",
+                "cancel"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cancel Booking via URL Path Alias",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Customer requested cancellation\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/bookings/{{booking_ref}}/cancel",
@@ -481,7 +741,99 @@
       ]
     },
     {
-      "name": "7. AI Conversational Assistant (US-17 to US-20)",
+      "name": "9. Meta WhatsApp Cloud API Integration",
+      "item": [
+        {
+          "name": "Verify Webhook Challenge (Meta Hub Challenge)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/whatsapp/webhook?hub.mode=subscribe&hub.challenge=test_meta_challenge_123&hub.verify_token=technovate_whatsapp_verify_token_2026",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "whatsapp",
+                "webhook"
+              ],
+              "query": [
+                {
+                  "key": "hub.mode",
+                  "value": "subscribe"
+                },
+                {
+                  "key": "hub.challenge",
+                  "value": "test_meta_challenge_123"
+                },
+                {
+                  "key": "hub.verify_token",
+                  "value": "technovate_whatsapp_verify_token_2026"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Simulate Inbound WhatsApp Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sender_phone\": \"919876543210\",\n  \"message\": \"\\u0ca8\\u0cae\\u0cb8\\u0ccd\\u0c95\\u0cbe\\u0cb0, \\u0cac\\u0cc6\\u0c82\\u0c97\\u0cb3\\u0cc2\\u0cb0\\u0cbf\\u0ca8\\u0cb2\\u0ccd\\u0cb2\\u0cbf \\u0ca8\\u0ca1\\u0cc6\\u0caf\\u0cc1\\u0cb5 \\u0cb9\\u0ccd\\u0caf\\u0cbe\\u0c95\\u0ca5\\u0cbe\\u0ca8\\u0ccd \\u0ca4\\u0cbf\\u0cb3\\u0cbf\\u0cb8\\u0cbf\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/whatsapp/simulate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "whatsapp",
+                "simulate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Offline Queue & Sync Replay",
+      "item": [
+        {
+          "name": "Replay Queued Offline Booking Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client_request_id\": \"c1f7a28e-offline-sync-001\",\n  \"event_id\": \"event-technovate-hack\",\n  \"tier_id\": \"tier-tech-early\",\n  \"quantity\": 2,\n  \"customer_name\": \"Adithya Offline\",\n  \"customer_email\": \"adithya.offline@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/offline/sync",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "offline",
+                "sync"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "11. AI Conversational Assistant (Multilingual)",
       "item": [
         {
           "name": "Chat - English Discovery & Price Inquiry",
@@ -509,7 +861,7 @@
           }
         },
         {
-          "name": "Chat - Kannada Query",
+          "name": "Chat - Kannada Query (ಕನ್ನಡ)",
           "request": {
             "method": "POST",
             "header": [
@@ -534,7 +886,7 @@
           }
         },
         {
-          "name": "Chat - Hindi Query",
+          "name": "Chat - Hindi Query (हिन्दी)",
           "request": {
             "method": "POST",
             "header": [
